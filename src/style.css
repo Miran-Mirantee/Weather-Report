@@ -2,5 +2,17 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: red;
+  background-color: lightcoral;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+html {
+  height: 100vh;
+}
+
+.report {
+  display: flex;
+  flex-direction: column;
 }
