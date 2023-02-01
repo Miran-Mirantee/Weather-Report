@@ -57,7 +57,7 @@ const updateWeather = async () => {
     weatherDOM.textContent = weather;
     weatherDescDOM.textContent = desc;
     tempDOM.textContent = convertTemp(tempUnit, temp);
-    realFeelDom.textContent = convertTemp(tempUnit, realFeel);
+    realFeelDom.textContent = `Feels like: ${convertTemp(tempUnit, realFeel)}`;
     humidityDOM.textContent = `Humidity: ${humidity}%`;
     pressureDOM.textContent = `Pressure: ${pressure} hPa`;
     windSpeedDOM.textContent = `Wind Speed: ${windSpeed} m/s`;
