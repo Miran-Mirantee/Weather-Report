@@ -65,4 +65,5 @@ input {
 .temp {
   font-size: 132px;
   font-weight: bold;
+  cursor: pointer;
 }
