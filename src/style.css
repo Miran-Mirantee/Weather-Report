@@ -34,8 +34,12 @@ form {
 }
 
 .city {
-  font-size: 48px;
+  font-size: 54px;
   font-weight: bold;
+}
+
+.weather {
+  font-size: 36px;
 }
 
 .temp {

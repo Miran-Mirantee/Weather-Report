@@ -43,11 +43,11 @@ const updateWeather = async () => {
     cityDOM.textContent = name;
     weatherDOM.textContent = weather;
     weatherDescDOM.textContent = desc;
-    tempDOM.textContent = temperature - 273.15;
-    realFeelDom.textContent = `Feels like: ${realFeel - 273.15}`;
+    tempDOM.textContent = `${temperature - 273.15} °C`;
+    realFeelDom.textContent = `Feels like: ${realFeel - 273.15} °C`;
     humidityDOM.textContent = `Humidity: ${humidity}%`;
-    pressureDOM.textContent = `Pressure: ${pressure}`;
-    windSpeedDOM.textContent = `Wind Speed: ${windSpeed}`;
+    pressureDOM.textContent = `Pressure: ${pressure} hPa`;
+    windSpeedDOM.textContent = `Wind Speed: ${windSpeed} m/s`;
 
     console.log(weatherInfo);
   } catch (err) {
