@@ -3,7 +3,7 @@ import "./style.css";
 const api = "514e1ece08bcd2e992e2242256b805de";
 let city = "bangkok";
 
-async function fetchWeather(cityName) {
+const fetchWeather = async (cityName) => {
   try {
     const response = await fetch(
       `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${api}`,
@@ -12,10 +12,9 @@ async function fetchWeather(cityName) {
     const weatherInfo = await response.json();
     return weatherInfo;
   } catch (err) {
-    alert(err);
     return "error";
   }
-}
+};
 
 const cityDOM = document.querySelector(".city");
 const weatherDOM = document.querySelector(".main");
@@ -27,6 +26,7 @@ const pressureDOM = document.querySelector(".pressure");
 const windSpeedDOM = document.querySelector(".wind-speed");
 const cityInput = document.getElementById("search-city");
 const form = document.querySelector("form");
+const errorMsg = document.querySelector(".error");
 
 const updateWeather = async () => {
   try {
@@ -43,20 +43,23 @@ const updateWeather = async () => {
     cityDOM.textContent = name;
     weatherDOM.textContent = weather;
     weatherDescDOM.textContent = desc;
-    tempDOM.textContent = `${temperature - 273.15} °C`;
-    realFeelDom.textContent = `Feels like: ${realFeel - 273.15} °C`;
+    tempDOM.textContent = `${Math.round((temperature - 273.15) * 100) / 100}°C`;
+    realFeelDom.textContent = `Feels like: ${
+      Math.round((realFeel - 273.15) * 100) / 100
+    }°C`;
     humidityDOM.textContent = `Humidity: ${humidity}%`;
     pressureDOM.textContent = `Pressure: ${pressure} hPa`;
     windSpeedDOM.textContent = `Wind Speed: ${windSpeed} m/s`;
 
-    console.log(weatherInfo);
+    errorMsg.textContent = "";
   } catch (err) {
-    alert(err);
+    errorMsg.textContent = "Error: location not found";
   }
 };
 updateWeather();
 
 form.addEventListener("submit", () => {
   city = cityInput.value;
+  cityInput.value = "";
   updateWeather();
 });
