@@ -2,17 +2,42 @@ html,
 body {
   margin: 0;
   padding: 0;
-  background-color: lightcoral;
+}
+
+body {
+  height: 100vh;
+  background-image: url(./background.jpg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+  color: white;
 }
 
-html {
-  height: 100vh;
+form {
+  position: absolute;
+  top: 18px;
+  right: 18px;
 }
 
 .report {
   display: flex;
   flex-direction: column;
+  gap: 4px;
+  position: absolute;
+  top: 36px;
+  left: 36px;
+  font-size: 24px;
+}
+
+.city {
+  font-size: 48px;
+  font-weight: bold;
+}
+
+.temp {
+  font-size: 132px;
 }

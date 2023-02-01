@@ -19,6 +19,7 @@ async function fetchWeather(cityName) {
 
 const cityDOM = document.querySelector(".city");
 const weatherDOM = document.querySelector(".main");
+const weatherDescDOM = document.querySelector(".desc");
 const tempDOM = document.querySelector(".temp");
 const realFeelDom = document.querySelector(".real-feel");
 const humidityDOM = document.querySelector(".humidity");
@@ -32,6 +33,7 @@ const updateWeather = async () => {
     const weatherInfo = await fetchWeather(city);
     const { name } = weatherInfo;
     const weather = weatherInfo.weather[0].main;
+    const desc = weatherInfo.weather[0].description;
     const temperature = weatherInfo.main.temp;
     const realFeel = weatherInfo.main.feels_like;
     const { humidity } = weatherInfo.main;
@@ -40,11 +42,12 @@ const updateWeather = async () => {
 
     cityDOM.textContent = name;
     weatherDOM.textContent = weather;
+    weatherDescDOM.textContent = desc;
     tempDOM.textContent = temperature - 273.15;
-    realFeelDom.textContent = realFeel;
-    humidityDOM.textContent = humidity;
-    pressureDOM.textContent = pressure;
-    windSpeedDOM.textContent = windSpeed;
+    realFeelDom.textContent = `Feels like: ${realFeel - 273.15}`;
+    humidityDOM.textContent = `Humidity: ${humidity}%`;
+    pressureDOM.textContent = `Pressure: ${pressure}`;
+    windSpeedDOM.textContent = `Wind Speed: ${windSpeed}`;
 
     console.log(weatherInfo);
   } catch (err) {
