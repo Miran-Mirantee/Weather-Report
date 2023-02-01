@@ -1,9 +1,7 @@
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
-let city = "bangkok";
-let weather;
-let temperature;
+const city = "bangkok";
 
 async function fetchWeather(cityName) {
   try {
@@ -15,22 +13,34 @@ async function fetchWeather(cityName) {
     return weatherInfo;
   } catch (err) {
     alert(err);
-    return "err";
+    return "error";
   }
 }
 
 const cityDOM = document.querySelector(".city");
 const weatherDOM = document.querySelector(".main");
 const tempDOM = document.querySelector(".temp");
+const realFeelDom = document.querySelector(".real-feel");
+const humidityDOM = document.querySelector(".humidity");
+const pressureDOM = document.querySelector(".pressure");
+const windSpeedDOM = document.querySelector(".wind-speed");
 
 (async () => {
-  const fetchedWeather = await fetchWeather(city);
-  temperature = fetchedWeather.main.temp;
-  weather = fetchedWeather.weather[0].main;
+  const weatherInfo = await fetchWeather(city);
+  const weather = weatherInfo.weather[0].main;
+  const temperature = weatherInfo.main.temp;
+  const realFeel = weatherInfo.main.feels_like;
+  const { humidity } = weatherInfo.main;
+  const { pressure } = weatherInfo.main;
+  const windSpeed = weatherInfo.wind.speed;
 
   cityDOM.textContent = city;
   weatherDOM.textContent = weather;
   tempDOM.textContent = temperature - 273.15;
+  realFeelDom.textContent = realFeel;
+  humidityDOM.textContent = humidity;
+  pressureDOM.textContent = pressure;
+  windSpeedDOM.textContent = windSpeed;
 
-  console.log(fetchedWeather);
+  console.log(weatherInfo);
 })();
