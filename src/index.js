@@ -1,9 +1,117 @@
 import * as THREE from "three";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
 let city = "bangkok";
 let tempUnit = "c";
+
+/**
+ * Webgl
+ */
+// Window's size
+const sizes = { width: window.innerWidth, height: window.innerHeight };
+
+window.addEventListener("resize", () => {
+  // Update sizes
+  sizes.width = window.innerWidth;
+  sizes.height = window.innerHeight;
+
+  // Update camera
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
+
+  // Update renderer
+  renderer.setSize(sizes.width, sizes.height);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
+
+// Canvas
+const canvasDom = document.querySelector("canvas.webgl");
+
+// Scene
+const scene = new THREE.Scene();
+
+// Camera
+const camera = new THREE.PerspectiveCamera(
+  45,
+  sizes.width / sizes.height,
+  0.1,
+  100
+);
+camera.position.y = 2;
+camera.position.z = 5;
+scene.add(camera);
+
+// Controls
+const controls = new OrbitControls(camera, canvasDom);
+
+// Renderer
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvasDom,
+  antialias: true,
+});
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setClearColor("black");
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+// Cube
+const material = new THREE.MeshStandardMaterial({
+  color: "red",
+});
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const mesh = new THREE.Mesh(geometry, material);
+mesh.castShadow = true;
+scene.add(mesh);
+
+// Floor
+const floorMaterial = new THREE.MeshStandardMaterial({
+  side: THREE.DoubleSide,
+});
+const floorGeometry = new THREE.PlaneGeometry(4, 4);
+const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+floor.receiveShadow = true;
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -0.5001;
+scene.add(floor);
+
+/**
+ * Lights
+ */
+// Ambient light
+const ambientLight = new THREE.AmbientLight(0x404040);
+scene.add(ambientLight);
+
+const sphericalPosition = new THREE.Spherical(5, Math.PI * 1.7, 1);
+const pointLight = new THREE.PointLight("white", 50);
+pointLight.position.setFromSpherical(sphericalPosition);
+pointLight.castShadow = true;
+scene.add(pointLight);
+
+const pointLightHelper = new THREE.PointLightHelper(pointLight);
+pointLightHelper.visible = false;
+scene.add(pointLightHelper);
+
+// Animate
+const clock = new THREE.Clock();
+
+const tick = () => {
+  const elapsedTime = clock.getElapsedTime();
+
+  // Renderer
+  renderer.render(scene, camera);
+
+  // Update directional light position
+  sphericalPosition.set(5, Math.PI * 1.7, elapsedTime);
+  pointLight.position.setFromSpherical(sphericalPosition);
+
+  // Call tick again on the next frame
+  window.requestAnimationFrame(tick);
+};
+
+tick();
 
 const cityDOM = document.querySelector(".city");
 const weatherDOM = document.querySelector(".main");
@@ -16,33 +124,6 @@ const windSpeedDOM = document.querySelector(".wind-speed");
 const cityInput = document.getElementById("search-city");
 const form = document.querySelector("form");
 const errorMsg = document.querySelector(".error");
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
-
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setAnimationLoop(animate);
-document.body.appendChild(renderer.domElement);
-
-const geometry = new THREE.BoxGeometry(1, 1, 1);
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
-
-camera.position.z = 5;
-
-function animate() {
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
-
-  renderer.render(scene, camera);
-}
 
 const fetchWeather = async (cityName) => {
   try {
