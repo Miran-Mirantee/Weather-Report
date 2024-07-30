@@ -65,8 +65,22 @@ input {
   font-weight: bold;
 }
 
+.icon {
+  position: absolute;
+  left: 0;
+}
+
 .weather {
   font-size: 36px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.main {
+  margin-left: 108px;
 }
 
 .temp {

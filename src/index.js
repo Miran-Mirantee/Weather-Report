@@ -114,6 +114,7 @@ const tick = () => {
 tick();
 
 const cityDOM = document.querySelector(".city");
+const imgDOM = document.querySelector(".icon");
 const weatherDOM = document.querySelector(".main");
 const weatherDescDOM = document.querySelector(".desc");
 const tempDOM = document.querySelector(".temp");
@@ -134,7 +135,7 @@ const fetchWeather = async (cityName) => {
     const weatherInfo = await response.json();
     return weatherInfo;
   } catch (err) {
-    return "error";
+    throw err;
   }
 };
 
@@ -153,6 +154,7 @@ const convertTemp = (unit, temp) => {
 const updateWeather = async () => {
   try {
     const weatherInfo = await fetchWeather(city);
+    console.log(weatherInfo);
     const { name } = weatherInfo;
     const weather = weatherInfo.weather[0].main;
     const desc = weatherInfo.weather[0].description;
@@ -162,6 +164,10 @@ const updateWeather = async () => {
     const { pressure } = weatherInfo.main;
     const windSpeed = weatherInfo.wind.speed;
 
+    imgDOM.setAttribute(
+      "src",
+      `https://openweathermap.org/img/wn/${weatherInfo.weather[0].icon}@2x.png`
+    );
     cityDOM.textContent = name;
     weatherDOM.textContent = weather;
     weatherDescDOM.textContent = desc;
