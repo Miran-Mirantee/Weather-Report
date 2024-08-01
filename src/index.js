@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
@@ -28,6 +30,16 @@ window.addEventListener("resize", () => {
   // Update renderer
   renderer.setSize(sizes.width, sizes.height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+});
+
+// Loader
+// GLTF loader
+const gltfLoader = new GLTFLoader();
+
+// Models
+gltfLoader.load("../static/camping.glb", (gltf) => {
+  console.log(gltf);
+  scene.add(gltf.scene);
 });
 
 // Canvas
@@ -60,38 +72,6 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor("black");
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-// Cube
-const material = new THREE.MeshStandardMaterial({
-  color: "red",
-});
-const geometry = new THREE.BoxGeometry(5, 5, 1);
-const mesh = new THREE.Mesh(geometry, material);
-mesh.castShadow = true;
-mesh.position.y = 2.501;
-scene.add(mesh);
-
-gui.add(mesh.position, "x", -10, 10, 0.01);
-gui.add(mesh.position, "z", -10, 10, 0.01);
-
-// Floor
-const floorMaterial = new THREE.MeshStandardMaterial({
-  side: THREE.DoubleSide,
-});
-const floorGeometry = new THREE.PlaneGeometry(16, 8);
-const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-floor.receiveShadow = true;
-floor.rotation.x = -Math.PI / 2;
-scene.add(floor);
-
-// Wall
-const wallMaterial = new THREE.MeshStandardMaterial({
-  side: THREE.DoubleSide,
-});
-const wallGeometry = new THREE.PlaneGeometry(16, 2);
-const wall = new THREE.Mesh(wallGeometry, wallMaterial);
-wall.position.y = 1;
-scene.add(wall);
 
 /**
  * Lights
