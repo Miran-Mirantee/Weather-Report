@@ -30,6 +30,7 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
+    "lil-gui": "^0.19.2",
     "lodash": "^4.17.21",
     "three": "^0.167.0"
   }

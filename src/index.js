@@ -1,10 +1,14 @@
 import * as THREE from "three";
+import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
 let city = "bangkok";
 let tempUnit = "c";
+
+// gui
+const gui = new GUI();
 
 /**
  * Webgl
@@ -61,21 +65,33 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const material = new THREE.MeshStandardMaterial({
   color: "red",
 });
-const geometry = new THREE.BoxGeometry(1, 1, 1);
+const geometry = new THREE.BoxGeometry(5, 5, 1);
 const mesh = new THREE.Mesh(geometry, material);
 mesh.castShadow = true;
+mesh.position.y = 2.501;
 scene.add(mesh);
+
+gui.add(mesh.position, "x", -10, 10, 0.01);
+gui.add(mesh.position, "z", -10, 10, 0.01);
 
 // Floor
 const floorMaterial = new THREE.MeshStandardMaterial({
   side: THREE.DoubleSide,
 });
-const floorGeometry = new THREE.PlaneGeometry(4, 4);
+const floorGeometry = new THREE.PlaneGeometry(16, 8);
 const floor = new THREE.Mesh(floorGeometry, floorMaterial);
 floor.receiveShadow = true;
 floor.rotation.x = -Math.PI / 2;
-floor.position.y = -0.5001;
 scene.add(floor);
+
+// Wall
+const wallMaterial = new THREE.MeshStandardMaterial({
+  side: THREE.DoubleSide,
+});
+const wallGeometry = new THREE.PlaneGeometry(16, 2);
+const wall = new THREE.Mesh(wallGeometry, wallMaterial);
+wall.position.y = 1;
+scene.add(wall);
 
 /**
  * Lights
@@ -84,8 +100,8 @@ scene.add(floor);
 const ambientLight = new THREE.AmbientLight(0x404040);
 scene.add(ambientLight);
 
-const sphericalPosition = new THREE.Spherical(5, Math.PI * 1.7, 1);
-const pointLight = new THREE.PointLight("white", 50);
+const sphericalPosition = new THREE.Spherical(20, Math.PI * 1.7, 1);
+const pointLight = new THREE.PointLight("white", 200);
 pointLight.position.setFromSpherical(sphericalPosition);
 pointLight.castShadow = true;
 scene.add(pointLight);
