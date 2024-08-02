@@ -49,22 +49,28 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
 
   const controls = new OrbitControls(camera, canvasDom);
   console.log(gltf.scene);
-  const merged = gltf.scene.children.find((child) => child.name == "Circle002");
+  const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
     child.castShadow = true;
+    child.material.side = 1;
   }
 
-  const tentRope = gltf.scene.children.find(
-    (child) => child.name == "BézierCurve004"
+  const tentShade = gltf.scene.children.find(
+    (child) => child.name == "tentShade"
   );
+  // tentShade.material.side = THREE.DoubleSide;
+  // tentShade.material.side = THREE.DoubleSide;
+  tentShade.castShadow = true;
+  console.log(tentShade);
 
   const screendoor = gltf.scene.children.find(
     (child) => child.name == "screendoor"
   );
+  screendoor.receiveShadow = true;
+  screendoor.castShadow = true;
+  screendoor.material.side = 1;
 
-  tentRope.receiveShadow = true;
-  tentRope.castShadow = true;
   scene.add(camera);
   scene.add(gltf.scene);
 });
@@ -116,26 +122,24 @@ gui.addColor(debugObject, "ambientLightColor").onChange(() => {
   ambientLight.color.set(debugObject.ambientLightColor);
 });
 
-const directionalLight = new THREE.DirectionalLight("white", 5);
+const directionalLight = new THREE.DirectionalLight("white", 3.24);
 directionalLight.castShadow = true;
-directionalLight.position.x = 1.15;
+directionalLight.position.x = 3.363;
 directionalLight.position.y = 3.854;
 directionalLight.position.z = -3.029;
-directionalLight.shadow.mapSize.set(1024, 1024);
+directionalLight.shadow.mapSize.set(1024 * 2, 1024 * 2);
 directionalLight.shadow.camera.near = 3;
-directionalLight.shadow.camera.far = 8.2;
+directionalLight.shadow.camera.far = 9.5;
 directionalLight.shadow.camera.top = 5.58;
 directionalLight.shadow.camera.bottom = -2;
-directionalLight.shadow.camera.left = -4;
-directionalLight.shadow.camera.right = 3.4;
+directionalLight.shadow.camera.left = -4.5;
+directionalLight.shadow.camera.right = 3;
+directionalLight.shadow.bias = 0;
+// directionalLight.shadow.bias = -0.006;
 scene.add(directionalLight);
 
-gui
-  .add(directionalLight.shadow.camera, "right", -10, 6, 0.000001)
-  .onChange(() => {
-    directionalLight.shadow.camera.updateProjectionMatrix();
-  });
-
+gui.add(directionalLight.shadow, "bias", -0.05, 0.05, 0.001);
+gui.add(directionalLight.shadow, "normalBias", -0.05, 0.05, 0.001);
 gui.add(directionalLight.position, "x", -10, 10, 0.001);
 gui.add(directionalLight.position, "y", -10, 10, 0.001);
 gui.add(directionalLight.position, "z", -10, 10, 0.001);
@@ -143,12 +147,13 @@ gui.add(directionalLight.position, "z", -10, 10, 0.001);
 const directionalLightHelper = new THREE.DirectionalLightHelper(
   directionalLight
 );
-directionalLightHelper.visible = true;
+directionalLightHelper.visible = false;
 scene.add(directionalLightHelper);
 
 const directionalLightCameraHelper = new THREE.CameraHelper(
   directionalLight.shadow.camera
 );
+directionalLightCameraHelper.visible = false;
 scene.add(directionalLightCameraHelper);
 
 // Animate
