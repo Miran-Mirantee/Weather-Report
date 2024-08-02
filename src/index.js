@@ -47,8 +47,24 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  // const controls = new OrbitControls(camera, canvasDom);
+  const controls = new OrbitControls(camera, canvasDom);
+  console.log(gltf.scene);
+  const merged = gltf.scene.children.find((child) => child.name == "Circle002");
+  for (const child of merged.children) {
+    child.receiveShadow = true;
+    child.castShadow = true;
+  }
 
+  const tentRope = gltf.scene.children.find(
+    (child) => child.name == "BézierCurve004"
+  );
+
+  const screendoor = gltf.scene.children.find(
+    (child) => child.name == "screendoor"
+  );
+
+  tentRope.receiveShadow = true;
+  tentRope.castShadow = true;
   scene.add(camera);
   scene.add(gltf.scene);
 });
@@ -102,10 +118,23 @@ gui.addColor(debugObject, "ambientLightColor").onChange(() => {
 
 const directionalLight = new THREE.DirectionalLight("white", 5);
 directionalLight.castShadow = true;
-directionalLight.position.x = 7.788;
-directionalLight.position.y = 10;
-directionalLight.position.z = -7.453;
+directionalLight.position.x = 1.15;
+directionalLight.position.y = 3.854;
+directionalLight.position.z = -3.029;
+directionalLight.shadow.mapSize.set(1024, 1024);
+directionalLight.shadow.camera.near = 3;
+directionalLight.shadow.camera.far = 8.2;
+directionalLight.shadow.camera.top = 5.58;
+directionalLight.shadow.camera.bottom = -2;
+directionalLight.shadow.camera.left = -4;
+directionalLight.shadow.camera.right = 3.4;
 scene.add(directionalLight);
+
+gui
+  .add(directionalLight.shadow.camera, "right", -10, 6, 0.000001)
+  .onChange(() => {
+    directionalLight.shadow.camera.updateProjectionMatrix();
+  });
 
 gui.add(directionalLight.position, "x", -10, 10, 0.001);
 gui.add(directionalLight.position, "y", -10, 10, 0.001);
@@ -116,6 +145,11 @@ const directionalLightHelper = new THREE.DirectionalLightHelper(
 );
 directionalLightHelper.visible = true;
 scene.add(directionalLightHelper);
+
+const directionalLightCameraHelper = new THREE.CameraHelper(
+  directionalLight.shadow.camera
+);
+scene.add(directionalLightCameraHelper);
 
 // Animate
 const clock = new THREE.Clock();
