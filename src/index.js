@@ -11,6 +11,7 @@ let tempUnit = "c";
 
 // gui
 const gui = new GUI();
+const debugObject = {};
 
 /**
  * Webgl
@@ -24,8 +25,10 @@ window.addEventListener("resize", () => {
   sizes.height = window.innerHeight;
 
   // Update camera
-  camera.aspect = sizes.width / sizes.height;
-  camera.updateProjectionMatrix();
+  if (camera) {
+    camera.aspect = sizes.width / sizes.height;
+    camera.updateProjectionMatrix();
+  }
 
   // Update renderer
   renderer.setSize(sizes.width, sizes.height);
@@ -36,9 +39,17 @@ window.addEventListener("resize", () => {
 // GLTF loader
 const gltfLoader = new GLTFLoader();
 
+let camera;
+
 // Models
 gltfLoader.load("../static/camping.glb", (gltf) => {
-  console.log(gltf);
+  camera = gltf.cameras[0];
+  camera.aspect = sizes.width / sizes.height;
+  camera.updateProjectionMatrix();
+
+  // const controls = new OrbitControls(camera, canvasDom);
+
+  scene.add(camera);
   scene.add(gltf.scene);
 });
 
@@ -49,18 +60,17 @@ const canvasDom = document.querySelector("canvas.webgl");
 const scene = new THREE.Scene();
 
 // Camera
-const camera = new THREE.PerspectiveCamera(
-  45,
-  sizes.width / sizes.height,
-  0.1,
-  100
-);
-camera.position.y = 2;
-camera.position.z = 5;
-scene.add(camera);
+// const camera = new THREE.PerspectiveCamera(
+//   45,
+//   sizes.width / sizes.height,
+//   0.1,
+//   100
+// );
+// camera.position.y = 2;
+// camera.position.z = 5;
+// scene.add(camera);
 
-// Controls
-const controls = new OrbitControls(camera, canvasDom);
+debugObject.clearColor = "#000";
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
@@ -69,26 +79,43 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor("black");
+renderer.setClearColor(debugObject.clearColor);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+gui.addColor(debugObject, "clearColor").onChange(() => {
+  renderer.setClearColor(debugObject.clearColor);
+});
 
 /**
  * Lights
  */
 // Ambient light
-const ambientLight = new THREE.AmbientLight(0x404040);
+debugObject.ambientLightColor = 0x404040;
+
+const ambientLight = new THREE.AmbientLight(debugObject.ambientLightColor);
 scene.add(ambientLight);
 
-const sphericalPosition = new THREE.Spherical(20, Math.PI * 1.7, 1);
-const pointLight = new THREE.PointLight("white", 200);
-pointLight.position.setFromSpherical(sphericalPosition);
-pointLight.castShadow = true;
-scene.add(pointLight);
+gui.addColor(debugObject, "ambientLightColor").onChange(() => {
+  ambientLight.color.set(debugObject.ambientLightColor);
+});
 
-const pointLightHelper = new THREE.PointLightHelper(pointLight);
-pointLightHelper.visible = false;
-scene.add(pointLightHelper);
+const directionalLight = new THREE.DirectionalLight("white", 5);
+directionalLight.castShadow = true;
+directionalLight.position.x = 7.788;
+directionalLight.position.y = 10;
+directionalLight.position.z = -7.453;
+scene.add(directionalLight);
+
+gui.add(directionalLight.position, "x", -10, 10, 0.001);
+gui.add(directionalLight.position, "y", -10, 10, 0.001);
+gui.add(directionalLight.position, "z", -10, 10, 0.001);
+
+const directionalLightHelper = new THREE.DirectionalLightHelper(
+  directionalLight
+);
+directionalLightHelper.visible = true;
+scene.add(directionalLightHelper);
 
 // Animate
 const clock = new THREE.Clock();
@@ -96,12 +123,10 @@ const clock = new THREE.Clock();
 const tick = () => {
   const elapsedTime = clock.getElapsedTime();
 
-  // Renderer
-  renderer.render(scene, camera);
-
-  // Update directional light position
-  sphericalPosition.set(5, Math.PI * 1.7, elapsedTime);
-  pointLight.position.setFromSpherical(sphericalPosition);
+  if (camera) {
+    // Renderer
+    renderer.render(scene, camera);
+  }
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
