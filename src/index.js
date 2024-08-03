@@ -3,6 +3,7 @@ import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
+import { Sky } from "three/examples/jsm/objects/Sky";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
@@ -48,7 +49,6 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   camera.updateProjectionMatrix();
 
   const controls = new OrbitControls(camera, canvasDom);
-  console.log(gltf.scene);
   const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
@@ -59,10 +59,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   const tentShade = gltf.scene.children.find(
     (child) => child.name == "tentShade"
   );
-  // tentShade.material.side = THREE.DoubleSide;
-  // tentShade.material.side = THREE.DoubleSide;
   tentShade.castShadow = true;
-  console.log(tentShade);
 
   const screendoor = gltf.scene.children.find(
     (child) => child.name == "screendoor"
@@ -92,7 +89,7 @@ const scene = new THREE.Scene();
 // camera.position.z = 5;
 // scene.add(camera);
 
-debugObject.clearColor = "#000";
+debugObject.clearColor = "#3498db";
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
@@ -102,6 +99,9 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor(debugObject.clearColor);
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.5;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -109,11 +109,61 @@ gui.addColor(debugObject, "clearColor").onChange(() => {
   renderer.setClearColor(debugObject.clearColor);
 });
 
+// Sky & sun
+const skyController = {
+  turbidity: 10,
+  rayleigh: 3,
+  mieCoefficient: 0.005,
+  mieDirectionalG: 0.7,
+  elevation: 2,
+  azimuth: 180,
+  exposure: renderer.toneMappingExposure,
+};
+
+const sky = new Sky();
+const sun = new THREE.Vector3();
+scene.add(sky);
+sky.scale.setScalar(5000);
+
+const updateSky = () => {
+  const uniforms = sky.material.uniforms;
+  uniforms["turbidity"].value = skyController.turbidity;
+  uniforms["rayleigh"].value = skyController.rayleigh;
+  uniforms["mieCoefficient"].value = skyController.mieCoefficient;
+  uniforms["mieDirectionalG"].value = skyController.mieDirectionalG;
+
+  const phi = THREE.MathUtils.degToRad(90 - skyController.elevation);
+  const theta = THREE.MathUtils.degToRad(skyController.azimuth);
+
+  sun.setFromSphericalCoords(10, phi, theta);
+
+  uniforms["sunPosition"].value.copy(sun);
+
+  renderer.toneMappingExposure = skyController.exposure;
+  if (camera) renderer.render(scene, camera);
+};
+
+updateSky();
+
+gui.add(skyController, "turbidity", 0.0, 20.0, 0.1).onChange(updateSky);
+gui.add(skyController, "rayleigh", 0.0, 4, 0.001).onChange(updateSky);
+gui.add(skyController, "mieCoefficient", 0.0, 0.1, 0.001).onChange(updateSky);
+gui.add(skyController, "mieDirectionalG", 0.0, 1, 0.001).onChange(updateSky);
+gui.add(skyController, "elevation", 0, 180, 0.1).onChange(() => {
+  updateSky();
+  updateDirectionalLight();
+});
+gui.add(skyController, "azimuth", -180, 180, 0.1).onChange(() => {
+  updateSky();
+  updateDirectionalLight();
+});
+gui.add(skyController, "exposure", 0, 1, 0.0001).onChange(updateSky);
+
 /**
  * Lights
  */
 // Ambient light
-debugObject.ambientLightColor = 0x404040;
+debugObject.ambientLightColor = "#898d90";
 
 const ambientLight = new THREE.AmbientLight(debugObject.ambientLightColor);
 scene.add(ambientLight);
@@ -128,21 +178,18 @@ directionalLight.position.x = 3.363;
 directionalLight.position.y = 3.854;
 directionalLight.position.z = -3.029;
 directionalLight.shadow.mapSize.set(1024 * 2, 1024 * 2);
-directionalLight.shadow.camera.near = 3;
-directionalLight.shadow.camera.far = 9.5;
-directionalLight.shadow.camera.top = 5.58;
-directionalLight.shadow.camera.bottom = -2;
-directionalLight.shadow.camera.left = -4.5;
-directionalLight.shadow.camera.right = 3;
-directionalLight.shadow.bias = 0;
-// directionalLight.shadow.bias = -0.006;
+directionalLight.shadow.camera.near = 4.39;
+directionalLight.shadow.camera.far = 16;
+directionalLight.shadow.camera.top = 5.5;
 scene.add(directionalLight);
+
+const updateDirectionalLight = () => {
+  directionalLight.position.copy(sun);
+};
+updateDirectionalLight();
 
 gui.add(directionalLight.shadow, "bias", -0.05, 0.05, 0.001);
 gui.add(directionalLight.shadow, "normalBias", -0.05, 0.05, 0.001);
-gui.add(directionalLight.position, "x", -10, 10, 0.001);
-gui.add(directionalLight.position, "y", -10, 10, 0.001);
-gui.add(directionalLight.position, "z", -10, 10, 0.001);
 
 const directionalLightHelper = new THREE.DirectionalLightHelper(
   directionalLight
@@ -155,6 +202,30 @@ const directionalLightCameraHelper = new THREE.CameraHelper(
 );
 directionalLightCameraHelper.visible = false;
 scene.add(directionalLightCameraHelper);
+
+const updateCameraHelper = () => {
+  directionalLight.shadow.camera.updateProjectionMatrix();
+  directionalLightCameraHelper.update();
+};
+
+// gui
+//   .add(directionalLight.shadow.camera, "near", -5, 5, 0.01)
+//   .onChange(updateCameraHelper);
+// gui
+//   .add(directionalLight.shadow.camera, "far", -5, 100, 0.01)
+//   .onChange(updateCameraHelper);
+// gui
+//   .add(directionalLight.shadow.camera, "top", -5, 7, 0.01)
+//   .onChange(updateCameraHelper);
+// gui
+//   .add(directionalLight.shadow.camera, "bottom", -5, 5, 0.01)
+//   .onChange(updateCameraHelper);
+// gui
+//   .add(directionalLight.shadow.camera, "left", -5, 5, 0.01)
+//   .onChange(updateCameraHelper);
+// gui
+//   .add(directionalLight.shadow.camera, "right", -5, 5, 0.01)
+//   .onChange(updateCameraHelper);
 
 // Animate
 const clock = new THREE.Clock();
@@ -170,9 +241,11 @@ const tick = () => {
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
 };
-
 tick();
 
+/**
+ * DOM
+ */
 const cityDOM = document.querySelector(".city");
 const imgDOM = document.querySelector(".icon");
 const weatherDOM = document.querySelector(".main");
@@ -215,13 +288,9 @@ const updateWeather = async () => {
   try {
     const weatherInfo = await fetchWeather(city);
     console.log(weatherInfo);
-    const { name } = weatherInfo;
-    const weather = weatherInfo.weather[0].main;
-    const desc = weatherInfo.weather[0].description;
-    const { temp } = weatherInfo.main;
-    const realFeel = weatherInfo.main.feels_like;
-    const { humidity } = weatherInfo.main;
-    const { pressure } = weatherInfo.main;
+    const { name, dt, timezone } = weatherInfo;
+    const { main, description } = weatherInfo.weather[0];
+    const { humidity, pressure, temp, feels_like } = weatherInfo.main;
     const windSpeed = weatherInfo.wind.speed;
 
     imgDOM.setAttribute(
@@ -229,10 +298,13 @@ const updateWeather = async () => {
       `https://openweathermap.org/img/wn/${weatherInfo.weather[0].icon}@2x.png`
     );
     cityDOM.textContent = name;
-    weatherDOM.textContent = weather;
-    weatherDescDOM.textContent = desc;
+    weatherDOM.textContent = main;
+    weatherDescDOM.textContent = description;
     tempDOM.textContent = convertTemp(tempUnit, temp);
-    realFeelDom.textContent = `Feels like: ${convertTemp(tempUnit, realFeel)}`;
+    realFeelDom.textContent = `Feels like: ${convertTemp(
+      tempUnit,
+      feels_like
+    )}`;
     humidityDOM.textContent = `Humidity: ${humidity}%`;
     pressureDOM.textContent = `Pressure: ${pressure} hPa`;
     windSpeedDOM.textContent = `Wind Speed: ${windSpeed} m/s`;
