@@ -396,120 +396,36 @@ const convertTemp = (unit, temp) => {
   return "error";
 };
 
-const compareTime = (time) => {
-  const dawnUpper = new Date();
-  dawnUpper.setHours(4);
-  dawnUpper.setMinutes(30);
-
-  const dawnLower = new Date();
-  dawnLower.setHours(6);
-  dawnLower.setMinutes(0);
-
-  const sunriseLower = new Date();
-  sunriseLower.setHours(7);
-  sunriseLower.setMinutes(0);
-
-  const earlyMorningLower = new Date();
-  earlyMorningLower.setHours(9);
-  earlyMorningLower.setMinutes(0);
-
-  const midMorningLower = new Date();
-  midMorningLower.setHours(11);
-  midMorningLower.setMinutes(0);
-
-  const earlyAfternoonUpper = new Date();
-  earlyAfternoonUpper.setHours(13);
-  earlyAfternoonUpper.setMinutes(0);
-
-  const earlyAfternoonLower = new Date();
-  earlyAfternoonLower.setHours(15);
-  earlyAfternoonLower.setMinutes(0);
-
-  const lateAfternoonLower = new Date();
-  lateAfternoonLower.setHours(17);
-  lateAfternoonLower.setMinutes(0);
-
-  const sunsetLower = new Date();
-  sunsetLower.setHours(18);
-  sunsetLower.setMinutes(30);
-
-  const duskLower = new Date();
-  duskLower.setHours(20);
-  duskLower.setMinutes(0);
-
-  const earlyNightLower = new Date();
-  earlyNightLower.setHours(22);
-  earlyNightLower.setMinutes(0);
-
-  console.log(earlyNightLower);
-
-  if (
-    dawnUpper.getTime() <= time.getTime() &&
-    time.getTime() <= dawnLower.getTime()
-  ) {
-    return "dawn";
-  } else if (
-    dawnLower.getTime() <= time.getTime() &&
-    time.getTime() <= sunriseLower.getTime()
-  ) {
-    return "sunrise";
-  } else if (
-    sunriseLower.getTime() <= time.getTime() &&
-    time.getTime() <= earlyMorningLower.getTime()
-  ) {
-    return "earlyMorning";
-  } else if (
-    earlyMorningLower.getTime() <= time.getTime() &&
-    time.getTime() <= midMorningLower.getTime()
-  ) {
-    return "midMorning";
-  } else if (
-    midMorningLower.getTime() <= time.getTime() &&
-    time.getTime() <= earlyAfternoonUpper.getTime()
-  ) {
-    return "noon";
-  } else if (
-    earlyAfternoonUpper.getTime() <= time.getTime() &&
-    time.getTime() <= earlyAfternoonLower.getTime()
-  ) {
-    return "earlyAfternoon";
-  } else if (
-    earlyAfternoonLower.getTime() <= time.getTime() &&
-    time.getTime() <= lateAfternoonLower.getTime()
-  ) {
-    return "lateAfternoon";
-  } else if (
-    lateAfternoonLower.getTime() <= time.getTime() &&
-    time.getTime() <= sunsetLower.getTime()
-  ) {
-    return "sunset";
-  } else if (
-    sunsetLower.getTime() <= time.getTime() &&
-    time.getTime() <= duskLower.getTime()
-  ) {
-    console.log(sunsetLower.getTime(), time.getTime(), duskLower.getTime());
-    return "dusk";
-  } else if (
-    duskLower.getTime() <= time.getTime() &&
-    time.getTime() <= earlyNightLower.getTime()
-  ) {
-    return "earlyNight";
-  } else {
-    return "midnight";
-  }
+const setTime = (hours, minutes) => {
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date;
 };
 
 const getPartOfDay = (time) => {
   const dateObj = new Date(time * 1000);
-  console.log(dateObj.getUTCHours());
-  console.log(dateObj.getMinutes());
+  const currentTime = setTime(dateObj.getUTCHours(), dateObj.getMinutes());
 
-  const currenttime = new Date();
-  currenttime.setHours(dateObj.getUTCHours());
-  currenttime.setMinutes(dateObj.getMinutes());
-  const partOfDay = compareTime(currenttime);
-  console.log(partOfDay);
-  console.log(currenttime);
+  const timeIntervals = [
+    { start: setTime(4, 30), end: setTime(6, 0), part: "dawn" },
+    { start: setTime(6, 0), end: setTime(7, 0), part: "sunrise" },
+    { start: setTime(7, 0), end: setTime(9, 0), part: "earlyMorning" },
+    { start: setTime(9, 0), end: setTime(11, 0), part: "midMorning" },
+    { start: setTime(11, 0), end: setTime(13, 0), part: "noon" },
+    { start: setTime(13, 0), end: setTime(15, 0), part: "earlyAfternoon" },
+    { start: setTime(15, 0), end: setTime(17, 0), part: "lateAfternoon" },
+    { start: setTime(17, 0), end: setTime(18, 30), part: "sunset" },
+    { start: setTime(18, 30), end: setTime(20, 0), part: "dusk" },
+    { start: setTime(20, 0), end: setTime(22, 0), part: "earlyNight" },
+  ];
+
+  for (const interval of timeIntervals) {
+    if (currentTime >= interval.start && currentTime <= interval.end) {
+      return interval.part;
+    }
+  }
+
+  return "midnight";
 };
 
 const updateWeather = async () => {
@@ -521,7 +437,7 @@ const updateWeather = async () => {
     const { humidity, pressure, temp, feels_like } = weatherInfo.main;
     const windSpeed = weatherInfo.wind.speed;
 
-    getPartOfDay(dt + timezone);
+    console.log(getPartOfDay(dt + timezone));
 
     imgDOM.setAttribute(
       "src",
