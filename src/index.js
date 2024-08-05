@@ -17,9 +17,9 @@ let tempUnit = "c";
  *  - add rain particle
  *  - add snow particle
  *  - make text more readable
- *  - adjust sun light color according to time
  *  - adjust ambient light according to time
  *  - use draco to compress model (optional)
+ *  - add anti aliase
  */
 
 // gui
@@ -117,6 +117,7 @@ const skyController = {
   exposure: renderer.toneMappingExposure,
   lightIntensity: 3.24,
   sunColor: "#fff",
+  elevationOffset: 0,
 };
 
 const skySettings = {
@@ -130,6 +131,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 2.5,
     sunColor: "#feda58",
+    elevationOffset: 0,
   },
   sunrise: {
     turbidity: 0.5,
@@ -141,6 +143,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3,
     sunColor: "#ffe485",
+    elevationOffset: 0,
   },
   earlyMorning: {
     turbidity: 3.8,
@@ -152,6 +155,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.2,
     sunColor: "#fef3cd",
+    elevationOffset: 0,
   },
   midMorning: {
     turbidity: 3.8,
@@ -163,6 +167,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.3,
     sunColor: "#fff5d6",
+    elevationOffset: 0,
   },
   noon: {
     turbidity: 3.8,
@@ -174,6 +179,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.5,
     sunColor: "#fff5d6",
+    elevationOffset: 0,
   },
   earlyAfternoon: {
     turbidity: 4.5,
@@ -185,6 +191,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.3,
     sunColor: "#ffeba3",
+    elevationOffset: 0,
   },
   lateAfternoon: {
     turbidity: 5.3,
@@ -196,6 +203,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.2,
     sunColor: "#ffdf6b",
+    elevationOffset: 0,
   },
   sunset: {
     turbidity: 20,
@@ -207,6 +215,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3,
     sunColor: "#ff8e52",
+    elevationOffset: 2.6,
   },
   dusk: {
     turbidity: 9.9,
@@ -217,6 +226,8 @@ const skySettings = {
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
     lightIntensity: 0,
+    sunColor: "#ff8e52",
+    elevationOffset: 0,
   },
   earlyNight: {
     turbidity: 20,
@@ -227,6 +238,8 @@ const skySettings = {
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
     lightIntensity: 0,
+    sunColor: "#ff8e52",
+    elevationOffset: 0,
   },
   midnight: {
     turbidity: 20,
@@ -237,6 +250,8 @@ const skySettings = {
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
     lightIntensity: 0,
+    sunColor: "#ff8e52",
+    elevationOffset: 0,
   },
 };
 
@@ -258,15 +273,15 @@ const updateSky = () => {
   const theta = THREE.MathUtils.degToRad(skyController.azimuth);
 
   sun.setFromSphericalCoords(10, phi, theta);
-  const phiOffset = THREE.MathUtils.degToRad(skyController.elevation - 0.5);
+  const phiOffset = THREE.MathUtils.degToRad(
+    skyController.elevation - skyController.elevationOffset
+  );
   directionalLightPosition.setFromSphericalCoords(10, phiOffset, theta);
 
   uniforms["sunPosition"].value.copy(sun);
 
   renderer.toneMappingExposure = skyController.exposure;
   if (camera) renderer.render(scene, camera);
-
-  updateDirectionalLight();
 };
 // updateSky(skyController);
 
@@ -285,55 +300,82 @@ gui
   .listen();
 gui
   .add(skyController, "elevation", -180, 180, 0.0001)
-  .onChange(updateSky)
+  .onChange(() => {
+    updateSky();
+    updateDirectionalLight();
+  })
   .listen();
-gui.add(skyController, "azimuth", -180, 180, 0.01).onChange(updateSky).listen();
+gui
+  .add(skyController, "elevationOffset", 0, 10, 0.0001)
+  .onChange(() => {
+    updateSky();
+    updateDirectionalLight();
+  })
+  .listen();
+gui
+  .add(skyController, "azimuth", -180, 180, 0.01)
+  .onChange(() => {
+    updateSky();
+    updateDirectionalLight();
+  })
+  .listen();
 gui.add(skyController, "exposure", 0, 1, 0.0001).onChange(updateSky).listen();
 
 const skyDebug = {};
 skyDebug.dawnChange = () => {
   Object.assign(skyController, skySettings.dawn);
   updateSky();
+  updateDirectionalLight();
 };
 skyDebug.sunriseChange = () => {
   Object.assign(skyController, skySettings.sunrise);
   updateSky();
+  updateDirectionalLight();
 };
 skyDebug.earlyMorningChange = () => {
   Object.assign(skyController, skySettings.earlyMorning);
   updateSky();
+  updateDirectionalLight();
 };
 skyDebug.midMorningChange = () => {
   Object.assign(skyController, skySettings.midMorning);
   updateSky();
+  updateDirectionalLight();
 };
 skyDebug.noonChange = () => {
   Object.assign(skyController, skySettings.noon);
   updateSky();
+  updateDirectionalLight();
 };
 skyDebug.earlyAfternoonChange = () => {
   Object.assign(skyController, skySettings.earlyAfternoon);
   updateSky();
+  updateDirectionalLight();
 };
 skyDebug.lateAfternoonChange = () => {
   Object.assign(skyController, skySettings.lateAfternoon);
   updateSky();
+  updateDirectionalLight();
 };
 skyDebug.sunsetChange = () => {
   Object.assign(skyController, skySettings.sunset);
   updateSky();
+  updateDirectionalLight();
 };
 skyDebug.duskChange = () => {
   Object.assign(skyController, skySettings.dusk);
   updateSky();
+  updateDirectionalLight();
 };
 skyDebug.earlyNightChange = () => {
   Object.assign(skyController, skySettings.earlyNight);
   updateSky();
+  updateDirectionalLight();
 };
 skyDebug.midnightChange = () => {
   Object.assign(skyController, skySettings.midnight);
   updateSky();
+  updateDirectionalLight();
 };
 
 gui.add(skyDebug, "dawnChange");
@@ -525,6 +567,8 @@ const updateWeather = async () => {
     });
 
     updateSky();
+    updateDirectionalLight();
+
     console.log(getPartOfDay(dt + timezone));
 
     imgDOM.setAttribute(
