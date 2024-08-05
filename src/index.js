@@ -133,6 +133,7 @@ const skySettings = {
     elevation: -90,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
+    lightIntensity: 2.5,
   },
   sunrise: {
     turbidity: 0.5,
@@ -142,6 +143,7 @@ const skySettings = {
     elevation: -89.5,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
+    lightIntensity: 3,
   },
   earlyMorning: {
     turbidity: 3.8,
@@ -151,6 +153,7 @@ const skySettings = {
     elevation: -60,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
+    lightIntensity: 3.2,
   },
   midMorning: {
     turbidity: 3.8,
@@ -160,6 +163,7 @@ const skySettings = {
     elevation: -30,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
+    lightIntensity: 3.3,
   },
   noon: {
     turbidity: 3.8,
@@ -169,6 +173,7 @@ const skySettings = {
     elevation: 0,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
+    lightIntensity: 3.5,
   },
   earlyAfternoon: {
     turbidity: 4.5,
@@ -178,6 +183,7 @@ const skySettings = {
     elevation: 60.5301,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
+    lightIntensity: 3.3,
   },
   lateAfternoon: {
     turbidity: 5.3,
@@ -187,6 +193,7 @@ const skySettings = {
     elevation: 85,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
+    lightIntensity: 3.2,
   },
   sunset: {
     turbidity: 20,
@@ -196,6 +203,7 @@ const skySettings = {
     elevation: 90,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
+    lightIntensity: 3,
   },
   dusk: {
     turbidity: 9.9,
@@ -205,6 +213,7 @@ const skySettings = {
     elevation: 96,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
+    lightIntensity: 0,
   },
   earlyNight: {
     turbidity: 20,
@@ -214,6 +223,7 @@ const skySettings = {
     elevation: 108,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
+    lightIntensity: 0,
   },
   midnight: {
     turbidity: 20,
@@ -223,6 +233,7 @@ const skySettings = {
     elevation: 180,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
+    lightIntensity: 0,
   },
 };
 
@@ -354,7 +365,7 @@ directionalLight.shadow.camera.far = 16;
 directionalLight.shadow.camera.top = 5.5;
 scene.add(directionalLight);
 
-gui.add(directionalLight, "intensity", 0, 10, 0.01);
+gui.add(directionalLight, "intensity", 0, 10, 0.01).listen();
 
 const updateDirectionalLight = () => {
   directionalLight.position.copy(sun);
