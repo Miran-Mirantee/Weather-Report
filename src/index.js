@@ -19,14 +19,11 @@ let tempUnit = "c";
  *  - make text more readable
  *  - adjust ambient light according to time
  *  - use draco to compress model (optional)
- *  - add anti aliase
+ *  - add anti-aliasing
  */
 
 // gui
 const gui = new GUI();
-const debugObject = {};
-debugObject.ambientLightColor = "#898d90";
-debugObject.sunColor = "#fff";
 
 /**
  * Webgl
@@ -117,6 +114,7 @@ const skyController = {
   exposure: renderer.toneMappingExposure,
   lightIntensity: 3.24,
   sunColor: "#fff",
+  ambientLightColor: "#898d90",
   elevationOffset: 0,
 };
 
@@ -131,6 +129,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 2.5,
     sunColor: "#feda58",
+    ambientLightColor: "#9e8b76",
     elevationOffset: 0,
   },
   sunrise: {
@@ -143,6 +142,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3,
     sunColor: "#ffe485",
+    ambientLightColor: "#898d90",
     elevationOffset: 0,
   },
   earlyMorning: {
@@ -155,6 +155,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.2,
     sunColor: "#fef3cd",
+    ambientLightColor: "#5b84a4",
     elevationOffset: 0,
   },
   midMorning: {
@@ -167,6 +168,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.3,
     sunColor: "#fff5d6",
+    ambientLightColor: "#5b84a4",
     elevationOffset: 0,
   },
   noon: {
@@ -179,6 +181,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.5,
     sunColor: "#fff5d6",
+    ambientLightColor: "#5b84a4",
     elevationOffset: 0,
   },
   earlyAfternoon: {
@@ -191,6 +194,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.3,
     sunColor: "#ffeba3",
+    ambientLightColor: "#5ba477",
     elevationOffset: 0,
   },
   lateAfternoon: {
@@ -203,6 +207,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.2,
     sunColor: "#ffdf6b",
+    ambientLightColor: "#a4a25b",
     elevationOffset: 0,
   },
   sunset: {
@@ -215,6 +220,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3,
     sunColor: "#ff8e52",
+    ambientLightColor: "#a4695b",
     elevationOffset: 2.6,
   },
   dusk: {
@@ -227,6 +233,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 0,
     sunColor: "#ff8e52",
+    ambientLightColor: "#716a81",
     elevationOffset: 0,
   },
   earlyNight: {
@@ -239,6 +246,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 0,
     sunColor: "#ff8e52",
+    ambientLightColor: "#716a81",
     elevationOffset: 0,
   },
   midnight: {
@@ -251,6 +259,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 0,
     sunColor: "#ff8e52",
+    ambientLightColor: "#716a81",
     elevationOffset: 0,
   },
 };
@@ -283,7 +292,6 @@ const updateSky = () => {
   renderer.toneMappingExposure = skyController.exposure;
   if (camera) renderer.render(scene, camera);
 };
-// updateSky(skyController);
 
 gui
   .add(skyController, "turbidity", 0.0, 20.0, 0.1)
@@ -326,56 +334,67 @@ skyDebug.dawnChange = () => {
   Object.assign(skyController, skySettings.dawn);
   updateSky();
   updateDirectionalLight();
+  updateAmbientLight();
 };
 skyDebug.sunriseChange = () => {
   Object.assign(skyController, skySettings.sunrise);
   updateSky();
   updateDirectionalLight();
+  updateAmbientLight();
 };
 skyDebug.earlyMorningChange = () => {
   Object.assign(skyController, skySettings.earlyMorning);
   updateSky();
   updateDirectionalLight();
+  updateAmbientLight();
 };
 skyDebug.midMorningChange = () => {
   Object.assign(skyController, skySettings.midMorning);
   updateSky();
   updateDirectionalLight();
+  updateAmbientLight();
 };
 skyDebug.noonChange = () => {
   Object.assign(skyController, skySettings.noon);
   updateSky();
   updateDirectionalLight();
+  updateAmbientLight();
 };
 skyDebug.earlyAfternoonChange = () => {
   Object.assign(skyController, skySettings.earlyAfternoon);
   updateSky();
   updateDirectionalLight();
+  updateAmbientLight();
 };
 skyDebug.lateAfternoonChange = () => {
   Object.assign(skyController, skySettings.lateAfternoon);
   updateSky();
   updateDirectionalLight();
+  updateAmbientLight();
 };
 skyDebug.sunsetChange = () => {
   Object.assign(skyController, skySettings.sunset);
   updateSky();
   updateDirectionalLight();
+  updateAmbientLight();
 };
 skyDebug.duskChange = () => {
   Object.assign(skyController, skySettings.dusk);
   updateSky();
   updateDirectionalLight();
+  updateAmbientLight();
 };
 skyDebug.earlyNightChange = () => {
   Object.assign(skyController, skySettings.earlyNight);
   updateSky();
   updateDirectionalLight();
+  updateAmbientLight();
 };
 skyDebug.midnightChange = () => {
   Object.assign(skyController, skySettings.midnight);
   updateSky();
   updateDirectionalLight();
+  updateAmbientLight();
 };
 
 gui.add(skyDebug, "dawnChange");
@@ -394,12 +413,19 @@ gui.add(skyDebug, "midnightChange");
  */
 // Ambient light
 
-const ambientLight = new THREE.AmbientLight(debugObject.ambientLightColor);
+const ambientLight = new THREE.AmbientLight(skyController.ambientLightColor);
 scene.add(ambientLight);
 
-gui.addColor(debugObject, "ambientLightColor").onChange(() => {
-  ambientLight.color.set(debugObject.ambientLightColor);
-});
+gui
+  .addColor(skyController, "ambientLightColor")
+  .listen()
+  .onChange(() => {
+    ambientLight.color.set(skyController.ambientLightColor);
+  });
+
+const updateAmbientLight = () => {
+  ambientLight.color.set(new THREE.Color(skyController.ambientLightColor));
+};
 
 const directionalLight = new THREE.DirectionalLight("white", 3.24);
 directionalLight.castShadow = true;
