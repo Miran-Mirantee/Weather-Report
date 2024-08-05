@@ -10,6 +10,19 @@ const api = "514e1ece08bcd2e992e2242256b805de";
 let city = "bangkok";
 let tempUnit = "c";
 
+/**
+ * TODO:
+ *  - add moon light
+ *  - add campfire fire particle (point light's included)
+ *  - add rain particle
+ *  - add snow particle
+ *  - make text more readable
+ *  - adjust sun light intensity according to time
+ *  - adjust sun light color according to time
+ *  - adjust ambient light according to time
+ *  - use draco to compress model (optional)
+ */
+
 // gui
 const gui = new GUI();
 const debugObject = {};
@@ -108,104 +121,105 @@ const skyController = {
   elevation: 2,
   azimuth: 17,
   exposure: renderer.toneMappingExposure,
+  lightIntensity: 3.24,
 };
 
 const skySettings = {
   dawn: {
-    turbidity: 10,
-    rayleigh: 3.5,
-    mieCoefficient: 0.03,
-    mieDirectionalG: 0.7,
+    turbidity: 2.1,
+    rayleigh: 1.443,
+    mieCoefficient: 0.02,
+    mieDirectionalG: 0.25,
     elevation: -90,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
   },
   sunrise: {
-    turbidity: 12,
-    rayleigh: 4,
-    mieCoefficient: 0.04,
-    mieDirectionalG: 0.8,
-    elevation: -87,
+    turbidity: 0.5,
+    rayleigh: 1.542,
+    mieCoefficient: 0.007,
+    mieDirectionalG: 0.999,
+    elevation: -89.5,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
   },
   earlyMorning: {
-    turbidity: 10,
-    rayleigh: 3.5,
+    turbidity: 3.8,
+    rayleigh: 0.903,
     mieCoefficient: 0.03,
-    mieDirectionalG: 0.7,
+    mieDirectionalG: 1,
     elevation: -60,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
   },
   midMorning: {
-    turbidity: 8,
-    rayleigh: 2.5,
-    mieCoefficient: 0.02,
-    mieDirectionalG: 0.6,
+    turbidity: 3.8,
+    rayleigh: 0.903,
+    mieCoefficient: 0.03,
+    mieDirectionalG: 1,
     elevation: -30,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
   },
   noon: {
-    turbidity: 5,
-    rayleigh: 1,
-    mieCoefficient: 0.01,
-    mieDirectionalG: 0.5,
+    turbidity: 3.8,
+    rayleigh: 0.903,
+    mieCoefficient: 0.03,
+    mieDirectionalG: 1,
     elevation: 0,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
   },
   earlyAfternoon: {
-    turbidity: 5,
-    rayleigh: 1,
-    mieCoefficient: 0.01,
-    mieDirectionalG: 0.5,
-    elevation: 30,
+    turbidity: 4.5,
+    rayleigh: 0.903,
+    mieCoefficient: 0.055,
+    mieDirectionalG: 1,
+    elevation: 60.5301,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
   },
   lateAfternoon: {
-    turbidity: 8,
-    rayleigh: 2.5,
-    mieCoefficient: 0.02,
-    mieDirectionalG: 0.6,
-    elevation: 60,
+    turbidity: 5.3,
+    rayleigh: 3.263,
+    mieCoefficient: 0.073,
+    mieDirectionalG: 0.041,
+    elevation: 85,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
   },
   sunset: {
-    turbidity: 12,
-    rayleigh: 4,
-    mieCoefficient: 0.04,
-    mieDirectionalG: 0.8,
+    turbidity: 20,
+    rayleigh: 3.115,
+    mieCoefficient: 0.015,
+    mieDirectionalG: 0.999,
     elevation: 90,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
   },
   dusk: {
-    turbidity: 10,
-    rayleigh: 3.5,
-    mieCoefficient: 0.03,
-    mieDirectionalG: 0.7,
+    turbidity: 9.9,
+    rayleigh: 0.804,
+    mieCoefficient: 0.015,
+    mieDirectionalG: 0.999,
     elevation: 96,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
   },
   earlyNight: {
-    turbidity: 6,
-    rayleigh: 2,
-    mieCoefficient: 0.02,
-    mieDirectionalG: 0.6,
+    turbidity: 20,
+    rayleigh: 4,
+    mieCoefficient: 0.015,
+    mieDirectionalG: 0.999,
     elevation: 108,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
   },
   midnight: {
-    turbidity: 2,
-    rayleigh: 0.5,
-    mieCoefficient: 0.01,
-    mieDirectionalG: 0.5,
+    turbidity: 20,
+    rayleigh: 0,
+    mieCoefficient: 0.1,
+    mieDirectionalG: 0.999,
     elevation: 180,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
@@ -237,7 +251,6 @@ const updateSky = () => {
 
   updateDirectionalLight();
 };
-
 // updateSky(skyController);
 
 gui
@@ -260,6 +273,63 @@ gui
 gui.add(skyController, "azimuth", -180, 180, 0.01).onChange(updateSky).listen();
 gui.add(skyController, "exposure", 0, 1, 0.0001).onChange(updateSky).listen();
 
+const skyDebug = {};
+skyDebug.dawnChange = () => {
+  Object.assign(skyController, skySettings.dawn);
+  updateSky();
+};
+skyDebug.sunriseChange = () => {
+  Object.assign(skyController, skySettings.sunrise);
+  updateSky();
+};
+skyDebug.earlyMorningChange = () => {
+  Object.assign(skyController, skySettings.earlyMorning);
+  updateSky();
+};
+skyDebug.midMorningChange = () => {
+  Object.assign(skyController, skySettings.midMorning);
+  updateSky();
+};
+skyDebug.noonChange = () => {
+  Object.assign(skyController, skySettings.noon);
+  updateSky();
+};
+skyDebug.earlyAfternoonChange = () => {
+  Object.assign(skyController, skySettings.earlyAfternoon);
+  updateSky();
+};
+skyDebug.lateAfternoonChange = () => {
+  Object.assign(skyController, skySettings.lateAfternoon);
+  updateSky();
+};
+skyDebug.sunsetChange = () => {
+  Object.assign(skyController, skySettings.sunset);
+  updateSky();
+};
+skyDebug.duskChange = () => {
+  Object.assign(skyController, skySettings.dusk);
+  updateSky();
+};
+skyDebug.earlyNightChange = () => {
+  Object.assign(skyController, skySettings.earlyNight);
+  updateSky();
+};
+skyDebug.midnightChange = () => {
+  Object.assign(skyController, skySettings.midnight);
+  updateSky();
+};
+
+gui.add(skyDebug, "dawnChange");
+gui.add(skyDebug, "sunriseChange");
+gui.add(skyDebug, "earlyMorningChange");
+gui.add(skyDebug, "midMorningChange");
+gui.add(skyDebug, "noonChange");
+gui.add(skyDebug, "earlyAfternoonChange");
+gui.add(skyDebug, "lateAfternoonChange");
+gui.add(skyDebug, "sunsetChange");
+gui.add(skyDebug, "duskChange");
+gui.add(skyDebug, "earlyNightChange");
+gui.add(skyDebug, "midnightChange");
 /**
  * Lights
  */
@@ -284,12 +354,12 @@ directionalLight.shadow.camera.far = 16;
 directionalLight.shadow.camera.top = 5.5;
 scene.add(directionalLight);
 
+gui.add(directionalLight, "intensity", 0, 10, 0.01);
+
 const updateDirectionalLight = () => {
   directionalLight.position.copy(sun);
+  directionalLight.intensity = skyController.lightIntensity;
 };
-
-gui.add(directionalLight.shadow, "bias", -0.05, 0.05, 0.001);
-gui.add(directionalLight.shadow, "normalBias", -0.05, 0.05, 0.001);
 
 const directionalLightHelper = new THREE.DirectionalLightHelper(
   directionalLight
