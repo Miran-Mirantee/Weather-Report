@@ -17,7 +17,6 @@ let tempUnit = "c";
  *  - add rain particle
  *  - add snow particle
  *  - make text more readable
- *  - adjust sun light intensity according to time
  *  - adjust sun light color according to time
  *  - adjust ambient light according to time
  *  - use draco to compress model (optional)
@@ -26,6 +25,8 @@ let tempUnit = "c";
 // gui
 const gui = new GUI();
 const debugObject = {};
+debugObject.ambientLightColor = "#898d90";
+debugObject.sunColor = "#fff";
 
 /**
  * Webgl
@@ -92,8 +93,6 @@ const canvasDom = document.querySelector("canvas.webgl");
 // Scene
 const scene = new THREE.Scene();
 
-debugObject.clearColor = "#3498db";
-
 // Renderer
 const renderer = new THREE.WebGLRenderer({
   canvas: canvasDom,
@@ -101,16 +100,11 @@ const renderer = new THREE.WebGLRenderer({
 });
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(debugObject.clearColor);
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.5;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-gui.addColor(debugObject, "clearColor").onChange(() => {
-  renderer.setClearColor(debugObject.clearColor);
-});
 
 // Sky & sun
 const skyController = {
@@ -122,6 +116,7 @@ const skyController = {
   azimuth: 17,
   exposure: renderer.toneMappingExposure,
   lightIntensity: 3.24,
+  sunColor: "#fff",
 };
 
 const skySettings = {
@@ -134,6 +129,7 @@ const skySettings = {
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
     lightIntensity: 2.5,
+    sunColor: "#feda58",
   },
   sunrise: {
     turbidity: 0.5,
@@ -144,6 +140,7 @@ const skySettings = {
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3,
+    sunColor: "#ffe485",
   },
   earlyMorning: {
     turbidity: 3.8,
@@ -154,6 +151,7 @@ const skySettings = {
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.2,
+    sunColor: "#fef3cd",
   },
   midMorning: {
     turbidity: 3.8,
@@ -164,6 +162,7 @@ const skySettings = {
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.3,
+    sunColor: "#fff5d6",
   },
   noon: {
     turbidity: 3.8,
@@ -174,6 +173,7 @@ const skySettings = {
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.5,
+    sunColor: "#fff5d6",
   },
   earlyAfternoon: {
     turbidity: 4.5,
@@ -184,6 +184,7 @@ const skySettings = {
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.3,
+    sunColor: "#ffeba3",
   },
   lateAfternoon: {
     turbidity: 5.3,
@@ -194,6 +195,7 @@ const skySettings = {
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3.2,
+    sunColor: "#ffdf6b",
   },
   sunset: {
     turbidity: 20,
@@ -204,6 +206,7 @@ const skySettings = {
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
     lightIntensity: 3,
+    sunColor: "#ff8e52",
   },
   dusk: {
     turbidity: 9.9,
@@ -242,6 +245,7 @@ scene.add(sky);
 sky.scale.setScalar(5000);
 
 const sun = new THREE.Vector3();
+const directionalLightPosition = new THREE.Vector3();
 
 const updateSky = () => {
   const uniforms = sky.material.uniforms;
@@ -254,6 +258,8 @@ const updateSky = () => {
   const theta = THREE.MathUtils.degToRad(skyController.azimuth);
 
   sun.setFromSphericalCoords(10, phi, theta);
+  const phiOffset = THREE.MathUtils.degToRad(skyController.elevation - 0.5);
+  directionalLightPosition.setFromSphericalCoords(10, phiOffset, theta);
 
   uniforms["sunPosition"].value.copy(sun);
 
@@ -345,7 +351,6 @@ gui.add(skyDebug, "midnightChange");
  * Lights
  */
 // Ambient light
-debugObject.ambientLightColor = "#898d90";
 
 const ambientLight = new THREE.AmbientLight(debugObject.ambientLightColor);
 scene.add(ambientLight);
@@ -366,10 +371,17 @@ directionalLight.shadow.camera.top = 5.5;
 scene.add(directionalLight);
 
 gui.add(directionalLight, "intensity", 0, 10, 0.01).listen();
+gui
+  .addColor(skyController, "sunColor")
+  .listen()
+  .onChange(() => {
+    directionalLight.color.set(new THREE.Color(skyController.sunColor));
+  });
 
 const updateDirectionalLight = () => {
-  directionalLight.position.copy(sun);
+  directionalLight.position.copy(directionalLightPosition);
   directionalLight.intensity = skyController.lightIntensity;
+  directionalLight.color.set(new THREE.Color(skyController.sunColor));
 };
 
 const directionalLightHelper = new THREE.DirectionalLightHelper(
