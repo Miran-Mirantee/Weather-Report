@@ -12,14 +12,12 @@ let tempUnit = "c";
 
 /**
  * TODO:
- *  - add moon light
  *  - add campfire fire particle (point light's included)
  *  - add rain particle
  *  - add snow particle
- *  - make text more readable
- *  - adjust ambient light according to time
  *  - use draco to compress model (optional)
  *  - add anti-aliasing
+ *  - move api key and clear all the api records in git
  */
 
 // gui
@@ -99,7 +97,7 @@ renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.outputEncoding = THREE.sRGBEncoding;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.5;
+renderer.toneMappingExposure = 0.75;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -314,7 +312,7 @@ gui
   })
   .listen();
 gui
-  .add(skyController, "elevationOffset", 0, 10, 0.0001)
+  .add(skyController, "elevationOffset", -180, 180, 0.0001)
   .onChange(() => {
     updateSky();
     updateDirectionalLight();
