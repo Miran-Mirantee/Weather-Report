@@ -27,6 +27,15 @@ module.exports = {
         test: /\.(png|svg|jpg|jpeg|gif|glb)$/i,
         type: "asset/resource",
       },
+      {
+        test: /\.(glsl|vert|frag)$/,
+        loader: "threejs-glsl-loader",
+        // Default values (can be omitted)
+        options: {
+          chunksPath: "../ShaderChunk", // if chunk fails to load with provided path (relative), the loader will retry with this one before giving up
+          chunksExt: "glsl", // Chunks extension, used when #import statement omits extension
+        },
+      },
     ],
   },
 };

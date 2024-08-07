@@ -4,7 +4,12 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { Sky } from "three/examples/jsm/objects/Sky";
+import flameVertexShader from "./shaders/flame/vertex.glsl";
+import flameFragmentShader from "./shaders/flame/fragment.glsl";
 import "./style.css";
+
+console.log(flameVertexShader);
+console.log(flameFragmentShader);
 
 const api = "514e1ece08bcd2e992e2242256b805de";
 let city = "bangkok";
