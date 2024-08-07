@@ -8,9 +8,6 @@ import flameVertexShader from "./shaders/flame/vertex.glsl";
 import flameFragmentShader from "./shaders/flame/fragment.glsl";
 import "./style.css";
 
-console.log(flameVertexShader);
-console.log(flameFragmentShader);
-
 const api = "514e1ece08bcd2e992e2242256b805de";
 let city = "bangkok";
 let tempUnit = "c";
@@ -52,6 +49,15 @@ window.addEventListener("resize", () => {
 // Loader
 // GLTF loader
 const gltfLoader = new GLTFLoader();
+
+// Texture loader
+const textureLoader = new THREE.TextureLoader();
+const perlinTexture = textureLoader.load("../static/perlin.png");
+perlinTexture.wrapS = THREE.RepeatWrapping;
+perlinTexture.wrapT = THREE.RepeatWrapping;
+
+const gradientTexture = textureLoader.load("../static/gradient.png");
+gradientTexture.flipY = false;
 
 let camera;
 
@@ -411,6 +417,46 @@ gui.add(skyDebug, "duskChange");
 gui.add(skyDebug, "earlyNightChange");
 gui.add(skyDebug, "midnightChange");
 
+// Campfire flame
+const campfireObject = {};
+campfireObject.color = "#fbba2d";
+campfireObject.intensity = 3.818;
+campfireObject.distance = 0;
+campfireObject.decay = 0.3294;
+campfireObject.position = new THREE.Vector3(1.076, 0.2, -1.4012);
+
+const flameMaterial = new THREE.ShaderMaterial({
+  vertexShader: flameVertexShader,
+  fragmentShader: flameFragmentShader,
+  uniforms: {
+    uSize: new THREE.Uniform(721.721),
+    uPixelRatio: new THREE.Uniform(Math.min(window.devicePixelRatio, 2)),
+    uPerlinTexture: new THREE.Uniform(perlinTexture),
+    uGradientTexture: new THREE.Uniform(gradientTexture),
+    uTime: new THREE.Uniform(0),
+    firstColor: new THREE.Uniform(new THREE.Color("red")),
+    secondColor: new THREE.Uniform(new THREE.Color("yellow")),
+    thirdColor: new THREE.Uniform(new THREE.Color("orange")),
+  },
+  transparent: true,
+  blending: THREE.AdditiveBlending,
+});
+
+const flameGeometry = new THREE.BufferGeometry();
+const positionArray = new Float32Array(3);
+
+flameGeometry.setAttribute(
+  "position",
+  new THREE.BufferAttribute(positionArray, 3)
+);
+
+gui.add(flameMaterial.uniforms.uSize, "value", 0, 2000, 0.001);
+
+const flame = new THREE.Points(flameGeometry, flameMaterial);
+flame.rotation.y = Math.PI;
+flame.position.copy(campfireObject.position);
+scene.add(flame);
+
 /**
  * Lights
  */
@@ -472,12 +518,6 @@ directionalLightCameraHelper.visible = false;
 scene.add(directionalLightCameraHelper);
 
 // Point light
-const campfireObject = {};
-campfireObject.color = "#fbba2d";
-campfireObject.intensity = 3.818;
-campfireObject.distance = 0;
-campfireObject.decay = 0.3294;
-
 const pointLight = new THREE.PointLight(
   campfireObject.color,
   campfireObject.intensity,
@@ -485,9 +525,7 @@ const pointLight = new THREE.PointLight(
   campfireObject.decay
 );
 pointLight.castShadow = true;
-pointLight.position.x = 1.076;
-pointLight.position.y = 0.2;
-pointLight.position.z = -1.4012;
+pointLight.position.copy(campfireObject.position);
 pointLight.shadow.camera.far = 7.08;
 pointLight.shadow.mapSize.set(1024 * 2, 1024 * 2);
 scene.add(pointLight);
@@ -542,6 +580,9 @@ const tick = () => {
     // Renderer
     renderer.render(scene, camera);
   }
+
+  // Update time
+  flameMaterial.uniforms.uTime.value = elapsedTime;
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
