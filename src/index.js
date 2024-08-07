@@ -17,7 +17,6 @@ let tempUnit = "c";
  *  - add snow particle
  *  - use draco to compress model (optional)
  *  - add anti-aliasing
- *  - move api key and clear all the api records in git
  */
 
 // gui
@@ -231,7 +230,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 0,
     sunColor: "#ff8e52",
-    ambientLightColor: "#716a81",
+    ambientLightColor: "#5a536a",
     elevationOffset: 0,
   },
   earlyNight: {
@@ -244,7 +243,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 0,
     sunColor: "#ff8e52",
-    ambientLightColor: "#716a81",
+    ambientLightColor: "#4c455f",
     elevationOffset: 0,
   },
   midnight: {
@@ -257,7 +256,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 0,
     sunColor: "#ff8e52",
-    ambientLightColor: "#716a81",
+    ambientLightColor: "#4c455f",
     elevationOffset: 0,
   },
 };
@@ -406,11 +405,12 @@ gui.add(skyDebug, "sunsetChange");
 gui.add(skyDebug, "duskChange");
 gui.add(skyDebug, "earlyNightChange");
 gui.add(skyDebug, "midnightChange");
+
 /**
  * Lights
  */
-// Ambient light
 
+// Ambient light
 const ambientLight = new THREE.AmbientLight(skyController.ambientLightColor);
 scene.add(ambientLight);
 
@@ -425,6 +425,7 @@ const updateAmbientLight = () => {
   ambientLight.color.set(new THREE.Color(skyController.ambientLightColor));
 };
 
+// Directional light
 const directionalLight = new THREE.DirectionalLight("white", 3.24);
 directionalLight.castShadow = true;
 directionalLight.position.x = 3.363;
@@ -436,7 +437,10 @@ directionalLight.shadow.camera.far = 16;
 directionalLight.shadow.camera.top = 5.5;
 scene.add(directionalLight);
 
-gui.add(directionalLight, "intensity", 0, 10, 0.01).listen();
+gui
+  .add(directionalLight, "intensity", 0, 10, 0.01)
+  .listen()
+  .name("sunlight intensity");
 gui
   .addColor(skyController, "sunColor")
   .listen()
@@ -462,28 +466,65 @@ const directionalLightCameraHelper = new THREE.CameraHelper(
 directionalLightCameraHelper.visible = false;
 scene.add(directionalLightCameraHelper);
 
+// Point light
+const campfireObject = {};
+campfireObject.color = "#fbba2d";
+campfireObject.intensity = 3.818;
+campfireObject.distance = 0;
+campfireObject.decay = 0.3294;
+
+const pointLight = new THREE.PointLight(
+  campfireObject.color,
+  campfireObject.intensity,
+  campfireObject.distance,
+  campfireObject.decay
+);
+pointLight.castShadow = true;
+pointLight.position.x = 1.076;
+pointLight.position.y = 0.2;
+pointLight.position.z = -1.4012;
+pointLight.shadow.camera.far = 7.08;
+pointLight.shadow.mapSize.set(1024 * 2, 1024 * 2);
+scene.add(pointLight);
+
+const pointLightHelper = new THREE.PointLightHelper(pointLight);
+pointLightHelper.visible = false;
+scene.add(pointLightHelper);
+
+const pointLightCameraHelper = new THREE.CameraHelper(pointLight.shadow.camera);
+pointLightCameraHelper.visible = false;
+scene.add(pointLightCameraHelper);
+
 const updateCameraHelper = () => {
-  directionalLight.shadow.camera.updateProjectionMatrix();
-  directionalLightCameraHelper.update();
+  pointLight.shadow.camera.updateProjectionMatrix();
+  pointLightCameraHelper.update();
 };
 
+// gui.add(pointLight.position, "y", 0, 0.5, 0.0001);
+gui.add(pointLight, "intensity", 0, 20, 0.001).name("campfire light intensity");
+gui.add(pointLight, "decay", 0, 5, 0.0001).name("campfire light decay");
+gui.add(pointLight, "visible");
+gui.addColor(campfireObject, "color").onChange(() => {
+  pointLight.color.set(new THREE.Color(campfireObject.color));
+});
+
 // gui
-//   .add(directionalLight.shadow.camera, "near", -5, 5, 0.01)
+//   .add(pointLight.shadow.camera, "near", -5, 5, 0.01)
 //   .onChange(updateCameraHelper);
 // gui
-//   .add(directionalLight.shadow.camera, "far", -5, 100, 0.01)
+//   .add(pointLight.shadow.camera, "far", -5, 100, 0.01)
 //   .onChange(updateCameraHelper);
 // gui
-//   .add(directionalLight.shadow.camera, "top", -5, 7, 0.01)
+//   .add(pointLight.shadow.camera, "top", -5, 7, 0.01)
 //   .onChange(updateCameraHelper);
 // gui
-//   .add(directionalLight.shadow.camera, "bottom", -5, 5, 0.01)
+//   .add(pointLight.shadow.camera, "bottom", -5, 5, 0.01)
 //   .onChange(updateCameraHelper);
 // gui
-//   .add(directionalLight.shadow.camera, "left", -5, 5, 0.01)
+//   .add(pointLight.shadow.camera, "left", -5, 5, 0.01)
 //   .onChange(updateCameraHelper);
 // gui
-//   .add(directionalLight.shadow.camera, "right", -5, 5, 0.01)
+//   .add(pointLight.shadow.camera, "right", -5, 5, 0.01)
 //   .onChange(updateCameraHelper);
 
 // Animate
@@ -560,8 +601,8 @@ const getPartOfDay = (time) => {
     { start: setTime(9, 0), end: setTime(11, 0), part: "midMorning" },
     { start: setTime(11, 0), end: setTime(13, 0), part: "noon" },
     { start: setTime(13, 0), end: setTime(15, 0), part: "earlyAfternoon" },
-    { start: setTime(15, 0), end: setTime(17, 0), part: "lateAfternoon" },
-    { start: setTime(17, 0), end: setTime(18, 30), part: "sunset" },
+    { start: setTime(15, 0), end: setTime(18, 0), part: "lateAfternoon" },
+    { start: setTime(18, 0), end: setTime(18, 30), part: "sunset" },
     { start: setTime(18, 30), end: setTime(20, 0), part: "dusk" },
     { start: setTime(20, 0), end: setTime(22, 0), part: "earlyNight" },
   ];
