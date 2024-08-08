@@ -343,6 +343,7 @@ skyDebug.dawnChange = () => {
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
+  campfireObject.toggleCampfire();
 };
 skyDebug.sunriseChange = () => {
   Object.assign(skyController, skySettings.sunrise);
@@ -427,6 +428,10 @@ campfireObject.position = new THREE.Vector3(1.076, 0.263, -1.4012);
 campfireObject.flameFirstColor = "#ff4d00";
 campfireObject.flameSecondColor = "#fdea72";
 campfireObject.flameThirdColor = "#ffae00";
+campfireObject.toggleCampfire = () => {
+  flame.visible = !flame.visible;
+  pointLight.visible = !pointLight.visible;
+};
 
 const flameMaterial = new THREE.ShaderMaterial({
   vertexShader: flameVertexShader,
@@ -510,9 +515,6 @@ const updateAmbientLight = () => {
 // Directional light
 const directionalLight = new THREE.DirectionalLight("white", 3.24);
 directionalLight.castShadow = true;
-directionalLight.position.x = 3.363;
-directionalLight.position.y = 3.854;
-directionalLight.position.z = -3.029;
 directionalLight.shadow.mapSize.set(1024 * 2, 1024 * 2);
 directionalLight.shadow.camera.near = 4.39;
 directionalLight.shadow.camera.far = 16;
@@ -569,18 +571,21 @@ const pointLightCameraHelper = new THREE.CameraHelper(pointLight.shadow.camera);
 pointLightCameraHelper.visible = false;
 scene.add(pointLightCameraHelper);
 
-const updateCameraHelper = () => {
-  pointLight.shadow.camera.updateProjectionMatrix();
-  pointLightCameraHelper.update();
-};
-
 // gui.add(pointLight.position, "y", 0, 0.5, 0.0001);
 gui.add(pointLight, "intensity", 0, 20, 0.001).name("campfire light intensity");
 gui.add(pointLight, "decay", 0, 5, 0.0001).name("campfire light decay");
-gui.add(pointLight, "visible");
-gui.addColor(campfireObject, "pointLightColor").onChange(() => {
-  pointLight.color.set(new THREE.Color(campfireObject.color));
-});
+gui
+  .addColor(campfireObject, "pointLightColor")
+  .onChange(() => {
+    pointLight.color.set(new THREE.Color(campfireObject.color));
+  })
+  .name("campfire light color");
+gui.add(campfireObject, "toggleCampfire");
+
+// const updateCameraHelper = () => {
+//   pointLight.shadow.camera.updateProjectionMatrix();
+//   pointLightCameraHelper.update();
+// };
 
 // gui
 //   .add(pointLight.shadow.camera, "near", -5, 5, 0.01)

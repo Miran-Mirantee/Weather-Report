@@ -25,7 +25,6 @@ void main() {
     float alpha = mask1;
     alpha *= smoothstep(0.0, 0.15, gl_PointCoord.x);
     alpha *= smoothstep(0.0, 0.15, 1.0 - gl_PointCoord.x);
-    alpha *= smoothstep(0.3, 0.5, gl_PointCoord.y);
     alpha *= smoothstep(0.0, 0.1, 1.0 - gl_PointCoord.y);
 
     float layer1 = mask1 - mask2;
