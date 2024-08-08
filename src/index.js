@@ -419,27 +419,60 @@ gui.add(skyDebug, "midnightChange");
 
 // Campfire flame
 const campfireObject = {};
-campfireObject.color = "#fbba2d";
+campfireObject.pointLightColor = "#fbba2d";
 campfireObject.intensity = 3.818;
 campfireObject.distance = 0;
 campfireObject.decay = 0.3294;
-campfireObject.position = new THREE.Vector3(1.076, 0.2, -1.4012);
+campfireObject.position = new THREE.Vector3(1.076, 0.263, -1.4012);
+campfireObject.flameFirstColor = "#ff4d00";
+campfireObject.flameSecondColor = "#fdea72";
+campfireObject.flameThirdColor = "#ffae00";
 
 const flameMaterial = new THREE.ShaderMaterial({
   vertexShader: flameVertexShader,
   fragmentShader: flameFragmentShader,
   uniforms: {
-    uSize: new THREE.Uniform(721.721),
+    uSize: new THREE.Uniform(1090.455),
     uPixelRatio: new THREE.Uniform(Math.min(window.devicePixelRatio, 2)),
     uPerlinTexture: new THREE.Uniform(perlinTexture),
     uGradientTexture: new THREE.Uniform(gradientTexture),
     uTime: new THREE.Uniform(0),
-    firstColor: new THREE.Uniform(new THREE.Color("red")),
-    secondColor: new THREE.Uniform(new THREE.Color("yellow")),
-    thirdColor: new THREE.Uniform(new THREE.Color("orange")),
+    uFirstColor: new THREE.Uniform(
+      new THREE.Color(campfireObject.flameFirstColor)
+    ),
+    uSecondColor: new THREE.Uniform(
+      new THREE.Color(campfireObject.flameSecondColor)
+    ),
+    uThirdColor: new THREE.Uniform(
+      new THREE.Color(campfireObject.flameThirdColor)
+    ),
+    uGradientMultiply: new THREE.Uniform(1.349),
+    uColumnMultiply: new THREE.Uniform(2.046),
   },
   transparent: true,
   blending: THREE.AdditiveBlending,
+});
+
+gui
+  .add(flameMaterial.uniforms.uGradientMultiply, "value", 1.0, 2.0, 0.001)
+  .name("uGradientMultiply");
+gui
+  .add(flameMaterial.uniforms.uColumnMultiply, "value", 1.0, 4.0, 0.001)
+  .name("uColumnMultiply");
+gui.addColor(campfireObject, "flameFirstColor").onChange(() => {
+  flameMaterial.uniforms.uFirstColor.value.set(
+    new THREE.Color(campfireObject.flameFirstColor)
+  );
+});
+gui.addColor(campfireObject, "flameSecondColor").onChange(() => {
+  flameMaterial.uniforms.uSecondColor.value.set(
+    new THREE.Color(campfireObject.flameSecondColor)
+  );
+});
+gui.addColor(campfireObject, "flameThirdColor").onChange(() => {
+  flameMaterial.uniforms.uThirdColor.value.set(
+    new THREE.Color(campfireObject.flameThirdColor)
+  );
 });
 
 const flameGeometry = new THREE.BufferGeometry();
@@ -450,11 +483,9 @@ flameGeometry.setAttribute(
   new THREE.BufferAttribute(positionArray, 3)
 );
 
-gui.add(flameMaterial.uniforms.uSize, "value", 0, 2000, 0.001);
-
 const flame = new THREE.Points(flameGeometry, flameMaterial);
-flame.rotation.y = Math.PI;
 flame.position.copy(campfireObject.position);
+
 scene.add(flame);
 
 /**
@@ -519,7 +550,7 @@ scene.add(directionalLightCameraHelper);
 
 // Point light
 const pointLight = new THREE.PointLight(
-  campfireObject.color,
+  campfireObject.pointLightColor,
   campfireObject.intensity,
   campfireObject.distance,
   campfireObject.decay
@@ -547,7 +578,7 @@ const updateCameraHelper = () => {
 gui.add(pointLight, "intensity", 0, 20, 0.001).name("campfire light intensity");
 gui.add(pointLight, "decay", 0, 5, 0.0001).name("campfire light decay");
 gui.add(pointLight, "visible");
-gui.addColor(campfireObject, "color").onChange(() => {
+gui.addColor(campfireObject, "pointLightColor").onChange(() => {
   pointLight.color.set(new THREE.Color(campfireObject.color));
 });
 
