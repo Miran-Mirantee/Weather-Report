@@ -68,7 +68,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  const controls = new OrbitControls(camera, canvasDom);
+  // const controls = new OrbitControls(camera, canvasDom);
   const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
@@ -539,15 +539,34 @@ scene.add(flame);
 
 // Rain
 const rainObject = {};
-rainObject.count = 15000;
+// rainObject.count = 1;
+rainObject.count = 10000;
+rainObject.color = "#7ff0e8";
 
 const rainMaterial = new THREE.ShaderMaterial({
   vertexShader: rainVertexShader,
   fragmentShader: rainFragmentShader,
   uniforms: {
-    uSize: new THREE.Uniform(100.0),
+    // uSize: new THREE.Uniform(5000),
+    uSize: new THREE.Uniform(450),
     uPixelRatio: new THREE.Uniform(Math.min(window.devicePixelRatio / 2)),
+    uOpacity: new THREE.Uniform(0.45),
+    uColor: new THREE.Uniform(new THREE.Color(rainObject.color)),
+    uTime: new THREE.Uniform(0),
   },
+  transparent: true,
+  depthWrite: false,
+  // blending: THREE.AdditiveBlending,
+});
+
+gui
+  .add(rainMaterial.uniforms.uSize, "value", 0, 2000, 0.01)
+  .name("rain particle size");
+gui
+  .add(rainMaterial.uniforms.uOpacity, "value", 0, 1, 0.01)
+  .name("rain particle opacity");
+gui.addColor(rainObject, "color").onChange(() => {
+  rainMaterial.uniforms.uColor.value.set(new THREE.Color(rainObject.color));
 });
 
 const rainGeometry = new THREE.BufferGeometry();
@@ -569,6 +588,10 @@ rainGeometry.setAttribute(
 );
 
 const rain = new THREE.Points(rainGeometry, rainMaterial);
+// rain.position.x = 1.076;
+// rain.position.y = 1;
+// rain.position.z = -1.4012;
+
 scene.add(rain);
 
 /**
@@ -697,6 +720,7 @@ const tick = () => {
 
   // Update time
   flameMaterial.uniforms.uTime.value = elapsedTime;
+  rainMaterial.uniforms.uTime.value = elapsedTime;
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
