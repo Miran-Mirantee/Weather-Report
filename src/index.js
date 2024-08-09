@@ -5,6 +5,8 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Sky } from "three/examples/jsm/objects/Sky";
 import flameVertexShader from "./shaders/flame/vertex.glsl";
 import flameFragmentShader from "./shaders/flame/fragment.glsl";
+import rainVertexShader from "./shaders/rain/vertex.glsl";
+import rainFragmentShader from "./shaders/rain/fragment.glsl";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
@@ -66,7 +68,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  // const controls = new OrbitControls(camera, canvasDom);
+  const controls = new OrbitControls(camera, canvasDom);
   const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
@@ -534,6 +536,37 @@ const flame = new THREE.Points(flameGeometry, flameMaterial);
 flame.position.copy(campfireObject.position);
 
 scene.add(flame);
+
+// Rain
+const rainObject = {};
+rainObject.count = 15000;
+
+const rainMaterial = new THREE.ShaderMaterial({
+  vertexShader: rainVertexShader,
+  fragmentShader: rainFragmentShader,
+  uniforms: {
+    uSize: new THREE.Uniform(100.0),
+    uPixelRatio: new THREE.Uniform(Math.min(window.devicePixelRatio / 2)),
+  },
+});
+
+const rainGeometry = new THREE.BufferGeometry();
+const rainPositionArray = new Float32Array(rainObject.count * 3);
+
+for (let i = 0; i < rainObject.count; i++) {
+  const i3 = i * 3;
+  rainPositionArray[i3] = Math.random() * 2;
+  rainPositionArray[i3 + 1] = Math.random() * 2;
+  rainPositionArray[i3 + 2] = Math.random() * 2;
+}
+
+rainGeometry.setAttribute(
+  "position",
+  new THREE.BufferAttribute(rainPositionArray, 3)
+);
+
+const rain = new THREE.Points(rainGeometry, rainMaterial);
+scene.add(rain);
 
 /**
  * Lights
