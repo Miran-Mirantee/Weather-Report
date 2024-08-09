@@ -279,77 +279,77 @@ const skyDebug = {};
 skyDebug.dawnChange = () => {
   Object.assign(skyController, skySettings.dawn);
   updateSky();
-  updateDirectionalLight();
+  updateDirectionalLight(rain.visible);
   updateAmbientLight();
   campfireObject.campfireOn();
 };
 skyDebug.sunriseChange = () => {
   Object.assign(skyController, skySettings.sunrise);
   updateSky();
-  updateDirectionalLight();
+  updateDirectionalLight(rain.visible);
   updateAmbientLight();
   campfireObject.campfireOn();
 };
 skyDebug.earlyMorningChange = () => {
   Object.assign(skyController, skySettings.earlyMorning);
   updateSky();
-  updateDirectionalLight();
+  updateDirectionalLight(rain.visible);
   updateAmbientLight();
   campfireObject.killCampfire();
 };
 skyDebug.midMorningChange = () => {
   Object.assign(skyController, skySettings.midMorning);
   updateSky();
-  updateDirectionalLight();
+  updateDirectionalLight(rain.visible);
   updateAmbientLight();
   campfireObject.killCampfire();
 };
 skyDebug.noonChange = () => {
   Object.assign(skyController, skySettings.noon);
   updateSky();
-  updateDirectionalLight();
+  updateDirectionalLight(rain.visible);
   updateAmbientLight();
   campfireObject.campfireOn();
 };
 skyDebug.earlyAfternoonChange = () => {
   Object.assign(skyController, skySettings.earlyAfternoon);
   updateSky();
-  updateDirectionalLight();
+  updateDirectionalLight(rain.visible);
   updateAmbientLight();
   campfireObject.killCampfire();
 };
 skyDebug.lateAfternoonChange = () => {
   Object.assign(skyController, skySettings.lateAfternoon);
   updateSky();
-  updateDirectionalLight();
+  updateDirectionalLight(rain.visible);
   updateAmbientLight();
   campfireObject.killCampfire();
 };
 skyDebug.sunsetChange = () => {
   Object.assign(skyController, skySettings.sunset);
   updateSky();
-  updateDirectionalLight();
+  updateDirectionalLight(rain.visible);
   updateAmbientLight();
   campfireObject.campfireOn();
 };
 skyDebug.duskChange = () => {
   Object.assign(skyController, skySettings.dusk);
   updateSky();
-  updateDirectionalLight();
+  updateDirectionalLight(rain.visible);
   updateAmbientLight();
   campfireObject.campfireOn();
 };
 skyDebug.earlyNightChange = () => {
   Object.assign(skyController, skySettings.earlyNight);
   updateSky();
-  updateDirectionalLight();
+  updateDirectionalLight(rain.visible);
   updateAmbientLight();
   campfireObject.campfireOn();
 };
 skyDebug.midnightChange = () => {
   Object.assign(skyController, skySettings.midnight);
   updateSky();
-  updateDirectionalLight();
+  updateDirectionalLight(rain.visible);
   updateAmbientLight();
   campfireObject.campfireOn();
 };
@@ -431,9 +431,10 @@ gui
     directionalLight.color.set(new THREE.Color(skyController.sunColor));
   });
 
-const updateDirectionalLight = () => {
+const updateDirectionalLight = (isRaining) => {
   directionalLight.position.copy(directionalLightPosition);
-  directionalLight.intensity = skyController.lightIntensity;
+  directionalLight.intensity =
+    skyController.lightIntensity - (isRaining ? 2.5 : 0);
   directionalLight.color.set(new THREE.Color(skyController.sunColor));
 };
 
@@ -466,21 +467,21 @@ gui
   .add(skyController, "elevation", -180, 180, 0.0001)
   .onChange(() => {
     updateSky();
-    updateDirectionalLight();
+    updateDirectionalLight(rain.visible);
   })
   .listen();
 gui
   .add(skyController, "elevationOffset", -180, 180, 0.0001)
   .onChange(() => {
     updateSky();
-    updateDirectionalLight();
+    updateDirectionalLight(rain.visible);
   })
   .listen();
 gui
   .add(skyController, "azimuth", -180, 180, 0.01)
   .onChange(() => {
     updateSky();
-    updateDirectionalLight();
+    updateDirectionalLight(rain.visible);
   })
   .listen();
 gui.add(skyController, "exposure", 0, 1, 0.0001).onChange(updateSky).listen();
@@ -637,12 +638,15 @@ rainObject.count = 10000;
 rainObject.color = "#7ff0e8";
 rainObject.toggleRain = () => {
   rain.visible = !rain.visible;
+  updateDirectionalLight(rain.visible);
 };
 rainObject.rainOn = () => {
   rain.visible = true;
+  updateDirectionalLight(rain.visible);
 };
 rainObject.rainOff = () => {
   rain.visible = false;
+  updateDirectionalLight(rain.visible);
 };
 rainObject.additiveBlendingChange = () => {
   rainMaterial.blending = THREE.AdditiveBlending;
@@ -711,19 +715,18 @@ rainGeometry.setAttribute(
 );
 
 const rain = new THREE.Points(rainGeometry, rainMaterial);
+rain.visible = false;
 scene.add(rain);
 // rain.position.x = 1.076;
 // rain.position.y = 1;
 // rain.position.z = -1.4012;
 
-const updateRain = (weather) => {
-  const isRaining = weather == "Rain";
+const updateRain = (isRaining) => {
   if (isRaining) {
     rainObject.rainOn();
   } else {
     rainObject.rainOff();
   }
-  console.log(isRaining);
 };
 
 // const updateCameraHelper = () => {
@@ -853,15 +856,16 @@ const updateWeather = async () => {
     const windSpeed = weatherInfo.wind.speed;
     const partOfDay = getPartOfDay(dt + timezone);
     const newSkyController = skySettings[partOfDay];
+    const isRaining = main == "Rain";
 
     Object.assign(skyController, {
       ...newSkyController,
     });
 
     updateSky();
-    updateDirectionalLight();
+    updateDirectionalLight(rain.visible);
     updateCampfire(partOfDay);
-    updateRain(main);
+    updateRain(isRaining);
 
     console.log(partOfDay);
 
