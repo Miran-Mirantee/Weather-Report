@@ -68,7 +68,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  // const controls = new OrbitControls(camera, canvasDom);
+  const controls = new OrbitControls(camera, canvasDom);
   const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
@@ -111,7 +111,10 @@ renderer.toneMappingExposure = 0.75;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-// Sky & sun
+/**
+ * Sky & sun
+ */
+// Sky
 const skyController = {
   turbidity: 10,
   rayleigh: 3,
@@ -272,71 +275,6 @@ const skySettings = {
   },
 };
 
-const sky = new Sky();
-scene.add(sky);
-sky.scale.setScalar(5000);
-
-const sun = new THREE.Vector3();
-const directionalLightPosition = new THREE.Vector3();
-
-const updateSky = () => {
-  const uniforms = sky.material.uniforms;
-  uniforms["turbidity"].value = skyController.turbidity;
-  uniforms["rayleigh"].value = skyController.rayleigh;
-  uniforms["mieCoefficient"].value = skyController.mieCoefficient;
-  uniforms["mieDirectionalG"].value = skyController.mieDirectionalG;
-
-  const phi = THREE.MathUtils.degToRad(skyController.elevation);
-  const theta = THREE.MathUtils.degToRad(skyController.azimuth);
-
-  sun.setFromSphericalCoords(10, phi, theta);
-  const phiOffset = THREE.MathUtils.degToRad(
-    skyController.elevation - skyController.elevationOffset
-  );
-  directionalLightPosition.setFromSphericalCoords(10, phiOffset, theta);
-
-  uniforms["sunPosition"].value.copy(sun);
-
-  renderer.toneMappingExposure = skyController.exposure;
-  if (camera) renderer.render(scene, camera);
-};
-
-gui
-  .add(skyController, "turbidity", 0.0, 20.0, 0.1)
-  .onChange(updateSky)
-  .listen();
-gui.add(skyController, "rayleigh", 0.0, 4, 0.001).onChange(updateSky).listen();
-gui
-  .add(skyController, "mieCoefficient", 0.0, 0.1, 0.001)
-  .onChange(updateSky)
-  .listen();
-gui
-  .add(skyController, "mieDirectionalG", 0.0, 1, 0.001)
-  .onChange(updateSky)
-  .listen();
-gui
-  .add(skyController, "elevation", -180, 180, 0.0001)
-  .onChange(() => {
-    updateSky();
-    updateDirectionalLight();
-  })
-  .listen();
-gui
-  .add(skyController, "elevationOffset", -180, 180, 0.0001)
-  .onChange(() => {
-    updateSky();
-    updateDirectionalLight();
-  })
-  .listen();
-gui
-  .add(skyController, "azimuth", -180, 180, 0.01)
-  .onChange(() => {
-    updateSky();
-    updateDirectionalLight();
-  })
-  .listen();
-gui.add(skyController, "exposure", 0, 1, 0.0001).onChange(updateSky).listen();
-
 const skyDebug = {};
 skyDebug.dawnChange = () => {
   Object.assign(skyController, skySettings.dawn);
@@ -428,7 +366,114 @@ gui.add(skyDebug, "duskChange");
 gui.add(skyDebug, "earlyNightChange");
 gui.add(skyDebug, "midnightChange");
 
-// Campfire flame
+const sky = new Sky();
+scene.add(sky);
+sky.scale.setScalar(5000);
+
+const updateSky = () => {
+  const uniforms = sky.material.uniforms;
+  uniforms["turbidity"].value = skyController.turbidity;
+  uniforms["rayleigh"].value = skyController.rayleigh;
+  uniforms["mieCoefficient"].value = skyController.mieCoefficient;
+  uniforms["mieDirectionalG"].value = skyController.mieDirectionalG;
+
+  const phi = THREE.MathUtils.degToRad(skyController.elevation);
+  const theta = THREE.MathUtils.degToRad(skyController.azimuth);
+
+  sun.setFromSphericalCoords(10, phi, theta);
+  const phiOffset = THREE.MathUtils.degToRad(
+    skyController.elevation - skyController.elevationOffset
+  );
+  directionalLightPosition.setFromSphericalCoords(10, phiOffset, theta);
+
+  uniforms["sunPosition"].value.copy(sun);
+
+  renderer.toneMappingExposure = skyController.exposure;
+  if (camera) renderer.render(scene, camera);
+};
+
+// Sun
+const sun = new THREE.Vector3();
+const directionalLightPosition = new THREE.Vector3();
+
+// Directional light
+const directionalLight = new THREE.DirectionalLight("white", 3.24);
+directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.set(1024 * 2, 1024 * 2);
+directionalLight.shadow.camera.near = 4.39;
+directionalLight.shadow.camera.far = 16;
+directionalLight.shadow.camera.top = 5.5;
+scene.add(directionalLight);
+
+gui
+  .add(directionalLight, "intensity", 0, 10, 0.01)
+  .listen()
+  .name("sunlight intensity");
+gui
+  .addColor(skyController, "sunColor")
+  .listen()
+  .onChange(() => {
+    directionalLight.color.set(new THREE.Color(skyController.sunColor));
+  });
+
+const updateDirectionalLight = () => {
+  directionalLight.position.copy(directionalLightPosition);
+  directionalLight.intensity = skyController.lightIntensity;
+  directionalLight.color.set(new THREE.Color(skyController.sunColor));
+};
+
+const directionalLightHelper = new THREE.DirectionalLightHelper(
+  directionalLight
+);
+directionalLightHelper.visible = false;
+scene.add(directionalLightHelper);
+
+const directionalLightCameraHelper = new THREE.CameraHelper(
+  directionalLight.shadow.camera
+);
+directionalLightCameraHelper.visible = false;
+scene.add(directionalLightCameraHelper);
+
+gui
+  .add(skyController, "turbidity", 0.0, 20.0, 0.1)
+  .onChange(updateSky)
+  .listen();
+gui.add(skyController, "rayleigh", 0.0, 4, 0.001).onChange(updateSky).listen();
+gui
+  .add(skyController, "mieCoefficient", 0.0, 0.1, 0.001)
+  .onChange(updateSky)
+  .listen();
+gui
+  .add(skyController, "mieDirectionalG", 0.0, 1, 0.001)
+  .onChange(updateSky)
+  .listen();
+gui
+  .add(skyController, "elevation", -180, 180, 0.0001)
+  .onChange(() => {
+    updateSky();
+    updateDirectionalLight();
+  })
+  .listen();
+gui
+  .add(skyController, "elevationOffset", -180, 180, 0.0001)
+  .onChange(() => {
+    updateSky();
+    updateDirectionalLight();
+  })
+  .listen();
+gui
+  .add(skyController, "azimuth", -180, 180, 0.01)
+  .onChange(() => {
+    updateSky();
+    updateDirectionalLight();
+  })
+  .listen();
+gui.add(skyController, "exposure", 0, 1, 0.0001).onChange(updateSky).listen();
+
+/**
+ * Campfire
+ */
+// Shader
 const campfireObject = {};
 campfireObject.pointLightColor = "#fbba2d";
 campfireObject.intensity = 3.818;
@@ -450,6 +495,8 @@ campfireObject.campfireOn = () => {
   flame.visible = true;
   pointLight.visible = true;
 };
+
+gui.add(campfireObject, "toggleCampfire");
 
 const updateCampfire = (partOfDay) => {
   switch (partOfDay) {
@@ -537,20 +584,63 @@ flame.position.copy(campfireObject.position);
 
 scene.add(flame);
 
-// Rain
+// Point light
+const pointLight = new THREE.PointLight(
+  campfireObject.pointLightColor,
+  campfireObject.intensity,
+  campfireObject.distance,
+  campfireObject.decay
+);
+pointLight.castShadow = true;
+pointLight.position.copy(campfireObject.position);
+pointLight.shadow.camera.far = 7.08;
+pointLight.shadow.mapSize.set(1024 * 2, 1024 * 2);
+scene.add(pointLight);
+
+const pointLightHelper = new THREE.PointLightHelper(pointLight);
+pointLightHelper.visible = false;
+scene.add(pointLightHelper);
+
+const pointLightCameraHelper = new THREE.CameraHelper(pointLight.shadow.camera);
+pointLightCameraHelper.visible = false;
+scene.add(pointLightCameraHelper);
+
+gui.add(pointLight, "intensity", 0, 20, 0.001).name("campfire light intensity");
+gui.add(pointLight, "decay", 0, 5, 0.0001).name("campfire light decay");
+gui
+  .addColor(campfireObject, "pointLightColor")
+  .onChange(() => {
+    pointLight.color.set(new THREE.Color(campfireObject.color));
+  })
+  .name("campfire light color");
+
+/**
+ * Rain
+ */
 const rainObject = {};
-// rainObject.count = 1;
 rainObject.count = 10000;
 rainObject.color = "#7ff0e8";
+rainObject.toggleRain = () => {
+  rain.visible = !rain.visible;
+};
+rainObject.additiveBlendingChange = () => {
+  rainMaterial.blending = THREE.AdditiveBlending;
+};
+rainObject.normalBlendingChange = () => {
+  rainMaterial.blending = THREE.NormalBlending;
+};
+
+gui.add(rainObject, "toggleRain");
 
 const rainMaterial = new THREE.ShaderMaterial({
   vertexShader: rainVertexShader,
   fragmentShader: rainFragmentShader,
   uniforms: {
     // uSize: new THREE.Uniform(5000),
-    uSize: new THREE.Uniform(450),
+    uSize: new THREE.Uniform(600),
     uPixelRatio: new THREE.Uniform(Math.min(window.devicePixelRatio / 2)),
     uOpacity: new THREE.Uniform(0.45),
+    uLength: new THREE.Uniform(0.6),
     uColor: new THREE.Uniform(new THREE.Color(rainObject.color)),
     uTime: new THREE.Uniform(0),
   },
@@ -559,15 +649,23 @@ const rainMaterial = new THREE.ShaderMaterial({
   // blending: THREE.AdditiveBlending,
 });
 
+// console.log(rainMaterial.blending, THREE.blending);
+
 gui
   .add(rainMaterial.uniforms.uSize, "value", 0, 2000, 0.01)
   .name("rain particle size");
 gui
+  .add(rainMaterial.uniforms.uLength, "value", 0, 0.8, 0.01)
+  .name("rain particle trail length");
+gui
   .add(rainMaterial.uniforms.uOpacity, "value", 0, 1, 0.01)
   .name("rain particle opacity");
-gui.addColor(rainObject, "color").onChange(() => {
-  rainMaterial.uniforms.uColor.value.set(new THREE.Color(rainObject.color));
-});
+gui
+  .addColor(rainObject, "color")
+  .name("rain color")
+  .onChange(() => {
+    rainMaterial.uniforms.uColor.value.set(new THREE.Color(rainObject.color));
+  });
 
 const rainGeometry = new THREE.BufferGeometry();
 const rainPositionArray = new Float32Array(rainObject.count * 3);
@@ -597,7 +695,6 @@ scene.add(rain);
 /**
  * Lights
  */
-
 // Ambient light
 const ambientLight = new THREE.AmbientLight(skyController.ambientLightColor);
 scene.add(ambientLight);
@@ -612,76 +709,6 @@ gui
 const updateAmbientLight = () => {
   ambientLight.color.set(new THREE.Color(skyController.ambientLightColor));
 };
-
-// Directional light
-const directionalLight = new THREE.DirectionalLight("white", 3.24);
-directionalLight.castShadow = true;
-directionalLight.shadow.mapSize.set(1024 * 2, 1024 * 2);
-directionalLight.shadow.camera.near = 4.39;
-directionalLight.shadow.camera.far = 16;
-directionalLight.shadow.camera.top = 5.5;
-scene.add(directionalLight);
-
-gui
-  .add(directionalLight, "intensity", 0, 10, 0.01)
-  .listen()
-  .name("sunlight intensity");
-gui
-  .addColor(skyController, "sunColor")
-  .listen()
-  .onChange(() => {
-    directionalLight.color.set(new THREE.Color(skyController.sunColor));
-  });
-
-const updateDirectionalLight = () => {
-  directionalLight.position.copy(directionalLightPosition);
-  directionalLight.intensity = skyController.lightIntensity;
-  directionalLight.color.set(new THREE.Color(skyController.sunColor));
-};
-
-const directionalLightHelper = new THREE.DirectionalLightHelper(
-  directionalLight
-);
-directionalLightHelper.visible = false;
-scene.add(directionalLightHelper);
-
-const directionalLightCameraHelper = new THREE.CameraHelper(
-  directionalLight.shadow.camera
-);
-directionalLightCameraHelper.visible = false;
-scene.add(directionalLightCameraHelper);
-
-// Point light
-const pointLight = new THREE.PointLight(
-  campfireObject.pointLightColor,
-  campfireObject.intensity,
-  campfireObject.distance,
-  campfireObject.decay
-);
-pointLight.castShadow = true;
-pointLight.position.copy(campfireObject.position);
-pointLight.shadow.camera.far = 7.08;
-pointLight.shadow.mapSize.set(1024 * 2, 1024 * 2);
-scene.add(pointLight);
-
-const pointLightHelper = new THREE.PointLightHelper(pointLight);
-pointLightHelper.visible = false;
-scene.add(pointLightHelper);
-
-const pointLightCameraHelper = new THREE.CameraHelper(pointLight.shadow.camera);
-pointLightCameraHelper.visible = false;
-scene.add(pointLightCameraHelper);
-
-// gui.add(pointLight.position, "y", 0, 0.5, 0.0001);
-gui.add(pointLight, "intensity", 0, 20, 0.001).name("campfire light intensity");
-gui.add(pointLight, "decay", 0, 5, 0.0001).name("campfire light decay");
-gui
-  .addColor(campfireObject, "pointLightColor")
-  .onChange(() => {
-    pointLight.color.set(new THREE.Color(campfireObject.color));
-  })
-  .name("campfire light color");
-gui.add(campfireObject, "toggleCampfire");
 
 // const updateCameraHelper = () => {
 //   pointLight.shadow.camera.updateProjectionMatrix();
