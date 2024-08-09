@@ -554,10 +554,13 @@ const rainGeometry = new THREE.BufferGeometry();
 const rainPositionArray = new Float32Array(rainObject.count * 3);
 
 for (let i = 0; i < rainObject.count; i++) {
+  const r = 3.64 * Math.sqrt(Math.random());
+  const theta = Math.random() * 2 * Math.PI;
+
   const i3 = i * 3;
-  rainPositionArray[i3] = Math.random() * 2;
-  rainPositionArray[i3 + 1] = Math.random() * 2;
-  rainPositionArray[i3 + 2] = Math.random() * 2;
+  rainPositionArray[i3] = -0.168078 + r * Math.cos(theta);
+  rainPositionArray[i3 + 1] = Math.random() * 3.5;
+  rainPositionArray[i3 + 2] = 1.25025 + r * Math.sin(theta);
 }
 
 rainGeometry.setAttribute(
