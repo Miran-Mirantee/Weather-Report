@@ -68,7 +68,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  const controls = new OrbitControls(camera, canvasDom);
+  // const controls = new OrbitControls(camera, canvasDom);
   const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
@@ -392,6 +392,21 @@ const updateSky = () => {
   if (camera) renderer.render(scene, camera);
 };
 
+// Ambient light
+const ambientLight = new THREE.AmbientLight(skyController.ambientLightColor);
+scene.add(ambientLight);
+
+gui
+  .addColor(skyController, "ambientLightColor")
+  .listen()
+  .onChange(() => {
+    ambientLight.color.set(skyController.ambientLightColor);
+  });
+
+const updateAmbientLight = () => {
+  ambientLight.color.set(new THREE.Color(skyController.ambientLightColor));
+};
+
 // Sun
 const sun = new THREE.Vector3();
 const directionalLightPosition = new THREE.Vector3();
@@ -623,6 +638,12 @@ rainObject.color = "#7ff0e8";
 rainObject.toggleRain = () => {
   rain.visible = !rain.visible;
 };
+rainObject.rainOn = () => {
+  rain.visible = true;
+};
+rainObject.rainOff = () => {
+  rain.visible = false;
+};
 rainObject.additiveBlendingChange = () => {
   rainMaterial.blending = THREE.AdditiveBlending;
 };
@@ -631,6 +652,8 @@ rainObject.normalBlendingChange = () => {
 };
 
 gui.add(rainObject, "toggleRain");
+gui.add(rainObject, "additiveBlendingChange");
+gui.add(rainObject, "normalBlendingChange");
 
 const rainMaterial = new THREE.ShaderMaterial({
   vertexShader: rainVertexShader,
@@ -643,17 +666,19 @@ const rainMaterial = new THREE.ShaderMaterial({
     uLength: new THREE.Uniform(0.6),
     uColor: new THREE.Uniform(new THREE.Color(rainObject.color)),
     uTime: new THREE.Uniform(0),
+    uSpeed: new THREE.Uniform(4.0),
   },
   transparent: true,
   depthWrite: false,
   // blending: THREE.AdditiveBlending,
 });
 
-// console.log(rainMaterial.blending, THREE.blending);
-
 gui
   .add(rainMaterial.uniforms.uSize, "value", 0, 2000, 0.01)
   .name("rain particle size");
+gui
+  .add(rainMaterial.uniforms.uSpeed, "value", 0, 9.0, 0.01)
+  .name("rain particle speed");
 gui
   .add(rainMaterial.uniforms.uLength, "value", 0, 0.8, 0.01)
   .name("rain particle trail length");
@@ -686,28 +711,19 @@ rainGeometry.setAttribute(
 );
 
 const rain = new THREE.Points(rainGeometry, rainMaterial);
+scene.add(rain);
 // rain.position.x = 1.076;
 // rain.position.y = 1;
 // rain.position.z = -1.4012;
 
-scene.add(rain);
-
-/**
- * Lights
- */
-// Ambient light
-const ambientLight = new THREE.AmbientLight(skyController.ambientLightColor);
-scene.add(ambientLight);
-
-gui
-  .addColor(skyController, "ambientLightColor")
-  .listen()
-  .onChange(() => {
-    ambientLight.color.set(skyController.ambientLightColor);
-  });
-
-const updateAmbientLight = () => {
-  ambientLight.color.set(new THREE.Color(skyController.ambientLightColor));
+const updateRain = (weather) => {
+  const isRaining = weather == "Rain";
+  if (isRaining) {
+    rainObject.rainOn();
+  } else {
+    rainObject.rainOff();
+  }
+  console.log(isRaining);
 };
 
 // const updateCameraHelper = () => {
@@ -845,6 +861,7 @@ const updateWeather = async () => {
     updateSky();
     updateDirectionalLight();
     updateCampfire(partOfDay);
+    updateRain(main);
 
     console.log(partOfDay);
 
