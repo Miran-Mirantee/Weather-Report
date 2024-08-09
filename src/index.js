@@ -2,7 +2,6 @@ import * as THREE from "three";
 import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader";
 import { Sky } from "three/examples/jsm/objects/Sky";
 import flameVertexShader from "./shaders/flame/vertex.glsl";
 import flameFragmentShader from "./shaders/flame/fragment.glsl";
@@ -14,10 +13,9 @@ let tempUnit = "c";
 
 /**
  * TODO:
- *  - add campfire fire particle (point light's included)
  *  - add rain particle
+ *  - add campfire smoke
  *  - add snow particle
- *  - use draco to compress model (optional)
  *  - add anti-aliasing
  */
 
@@ -343,67 +341,77 @@ skyDebug.dawnChange = () => {
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
-  campfireObject.toggleCampfire();
+  campfireObject.campfireOn();
 };
 skyDebug.sunriseChange = () => {
   Object.assign(skyController, skySettings.sunrise);
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
+  campfireObject.campfireOn();
 };
 skyDebug.earlyMorningChange = () => {
   Object.assign(skyController, skySettings.earlyMorning);
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
+  campfireObject.killCampfire();
 };
 skyDebug.midMorningChange = () => {
   Object.assign(skyController, skySettings.midMorning);
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
+  campfireObject.killCampfire();
 };
 skyDebug.noonChange = () => {
   Object.assign(skyController, skySettings.noon);
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
+  campfireObject.campfireOn();
 };
 skyDebug.earlyAfternoonChange = () => {
   Object.assign(skyController, skySettings.earlyAfternoon);
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
+  campfireObject.killCampfire();
 };
 skyDebug.lateAfternoonChange = () => {
   Object.assign(skyController, skySettings.lateAfternoon);
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
+  campfireObject.killCampfire();
 };
 skyDebug.sunsetChange = () => {
   Object.assign(skyController, skySettings.sunset);
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
+  campfireObject.campfireOn();
 };
 skyDebug.duskChange = () => {
   Object.assign(skyController, skySettings.dusk);
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
+  campfireObject.campfireOn();
 };
 skyDebug.earlyNightChange = () => {
   Object.assign(skyController, skySettings.earlyNight);
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
+  campfireObject.campfireOn();
 };
 skyDebug.midnightChange = () => {
   Object.assign(skyController, skySettings.midnight);
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
+  campfireObject.campfireOn();
 };
 
 gui.add(skyDebug, "dawnChange");
@@ -431,6 +439,40 @@ campfireObject.flameThirdColor = "#ffae00";
 campfireObject.toggleCampfire = () => {
   flame.visible = !flame.visible;
   pointLight.visible = !pointLight.visible;
+};
+campfireObject.killCampfire = () => {
+  flame.visible = false;
+  pointLight.visible = false;
+};
+campfireObject.campfireOn = () => {
+  flame.visible = true;
+  pointLight.visible = true;
+};
+
+const updateCampfire = (partOfDay) => {
+  switch (partOfDay) {
+    // case "dawn":
+    //   campfireObject.killCampfire();
+    //   break;
+    // case "sunrise":
+    //   campfireObject.killCampfire();
+    //   break;
+    case "earlyMorning":
+      campfireObject.killCampfire();
+      break;
+    case "midMorning":
+      campfireObject.killCampfire();
+      break;
+    case "earlyAfternoon":
+      campfireObject.killCampfire();
+      break;
+    case "lateAfternoon":
+      campfireObject.killCampfire();
+      break;
+    default:
+      campfireObject.campfireOn();
+      break;
+  }
 };
 
 const flameMaterial = new THREE.ShaderMaterial({
@@ -481,11 +523,11 @@ gui.addColor(campfireObject, "flameThirdColor").onChange(() => {
 });
 
 const flameGeometry = new THREE.BufferGeometry();
-const positionArray = new Float32Array(3);
+const flamePositionArray = new Float32Array(3);
 
 flameGeometry.setAttribute(
   "position",
-  new THREE.BufferAttribute(positionArray, 3)
+  new THREE.BufferAttribute(flamePositionArray, 3)
 );
 
 const flame = new THREE.Points(flameGeometry, flameMaterial);
@@ -706,8 +748,8 @@ const updateWeather = async () => {
     const { main, description } = weatherInfo.weather[0];
     const { humidity, pressure, temp, feels_like } = weatherInfo.main;
     const windSpeed = weatherInfo.wind.speed;
-
-    const newSkyController = skySettings[getPartOfDay(dt + timezone)];
+    const partOfDay = getPartOfDay(dt + timezone);
+    const newSkyController = skySettings[partOfDay];
 
     Object.assign(skyController, {
       ...newSkyController,
@@ -715,8 +757,9 @@ const updateWeather = async () => {
 
     updateSky();
     updateDirectionalLight();
+    updateCampfire(partOfDay);
 
-    console.log(getPartOfDay(dt + timezone));
+    console.log(partOfDay);
 
     imgDOM.setAttribute(
       "src",
