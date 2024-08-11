@@ -10,7 +10,7 @@ import rainFragmentShader from "./shaders/rain/fragment.glsl";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
-let city = "bangkok";
+let city = "Samut Sakhon";
 let tempUnit = "c";
 let isRaining = false;
 
@@ -281,78 +281,89 @@ const skyDebug = {};
 skyDebug.dawnChange = () => {
   Object.assign(skyController, skySettings.dawn);
   updateSky();
-  updateDirectionalLight(rain.visible);
+  updateDirectionalLight();
   updateAmbientLight();
+  updateRain();
   campfireObject.campfireOn();
 };
 skyDebug.sunriseChange = () => {
   Object.assign(skyController, skySettings.sunrise);
   updateSky();
-  updateDirectionalLight(rain.visible);
+  updateDirectionalLight();
   updateAmbientLight();
+  updateRain();
   campfireObject.campfireOn();
 };
 skyDebug.earlyMorningChange = () => {
   Object.assign(skyController, skySettings.earlyMorning);
   updateSky();
-  updateDirectionalLight(rain.visible);
+  updateDirectionalLight();
   updateAmbientLight();
+  updateRain();
   campfireObject.killCampfire();
 };
 skyDebug.midMorningChange = () => {
   Object.assign(skyController, skySettings.midMorning);
   updateSky();
-  updateDirectionalLight(rain.visible);
+  updateDirectionalLight();
   updateAmbientLight();
+  updateRain();
   campfireObject.killCampfire();
 };
 skyDebug.noonChange = () => {
   Object.assign(skyController, skySettings.noon);
   updateSky();
-  updateDirectionalLight(rain.visible);
+  updateDirectionalLight();
   updateAmbientLight();
+  updateRain();
   campfireObject.campfireOn();
 };
 skyDebug.earlyAfternoonChange = () => {
   Object.assign(skyController, skySettings.earlyAfternoon);
   updateSky();
-  updateDirectionalLight(rain.visible);
+  updateDirectionalLight();
   updateAmbientLight();
+  updateRain();
   campfireObject.killCampfire();
 };
 skyDebug.lateAfternoonChange = () => {
   Object.assign(skyController, skySettings.lateAfternoon);
   updateSky();
-  updateDirectionalLight(rain.visible);
+  updateDirectionalLight();
   updateAmbientLight();
+  updateRain();
   campfireObject.killCampfire();
 };
 skyDebug.sunsetChange = () => {
   Object.assign(skyController, skySettings.sunset);
   updateSky();
-  updateDirectionalLight(rain.visible);
+  updateDirectionalLight();
   updateAmbientLight();
+  updateRain();
   campfireObject.campfireOn();
 };
 skyDebug.duskChange = () => {
   Object.assign(skyController, skySettings.dusk);
   updateSky();
-  updateDirectionalLight(rain.visible);
+  updateDirectionalLight();
   updateAmbientLight();
+  updateRain();
   campfireObject.campfireOn();
 };
 skyDebug.earlyNightChange = () => {
   Object.assign(skyController, skySettings.earlyNight);
   updateSky();
-  updateDirectionalLight(rain.visible);
+  updateDirectionalLight();
   updateAmbientLight();
+  updateRain();
   campfireObject.campfireOn();
 };
 skyDebug.midnightChange = () => {
   Object.assign(skyController, skySettings.midnight);
   updateSky();
-  updateDirectionalLight(rain.visible);
+  updateDirectionalLight();
   updateAmbientLight();
+  updateRain();
   campfireObject.campfireOn();
 };
 
@@ -373,6 +384,8 @@ scene.add(sky);
 sky.scale.setScalar(5000);
 
 const updateSky = () => {
+  console.log("isRaining", isRaining);
+
   const uniforms = sky.material.uniforms;
   uniforms["turbidity"].value = skyController.turbidity;
   uniforms["rayleigh"].value = skyController.rayleigh;
@@ -647,12 +660,10 @@ rainObject.toggleRain = () => {
 };
 rainObject.rainOn = () => {
   rain.visible = true;
-  isRaining = rain.visible;
   updateDirectionalLight();
 };
 rainObject.rainOff = () => {
   rain.visible = false;
-  isRaining = rain.visible;
   updateDirectionalLight();
 };
 rainObject.additiveBlendingChange = () => {
@@ -728,37 +739,13 @@ scene.add(rain);
 // rain.position.y = 1;
 // rain.position.z = -1.4012;
 
-const updateRain = (isRaining) => {
+const updateRain = () => {
   if (isRaining) {
     rainObject.rainOn();
   } else {
     rainObject.rainOff();
   }
 };
-
-// const updateCameraHelper = () => {
-//   pointLight.shadow.camera.updateProjectionMatrix();
-//   pointLightCameraHelper.update();
-// };
-
-// gui
-//   .add(pointLight.shadow.camera, "near", -5, 5, 0.01)
-//   .onChange(updateCameraHelper);
-// gui
-//   .add(pointLight.shadow.camera, "far", -5, 100, 0.01)
-//   .onChange(updateCameraHelper);
-// gui
-//   .add(pointLight.shadow.camera, "top", -5, 7, 0.01)
-//   .onChange(updateCameraHelper);
-// gui
-//   .add(pointLight.shadow.camera, "bottom", -5, 5, 0.01)
-//   .onChange(updateCameraHelper);
-// gui
-//   .add(pointLight.shadow.camera, "left", -5, 5, 0.01)
-//   .onChange(updateCameraHelper);
-// gui
-//   .add(pointLight.shadow.camera, "right", -5, 5, 0.01)
-//   .onChange(updateCameraHelper);
 
 // Animate
 const clock = new THREE.Clock();
@@ -827,30 +814,53 @@ const setTime = (hours, minutes) => {
   return date;
 };
 
-const getPartOfDay = (time) => {
+const getPartOfDay = (time, weather) => {
   const dateObj = new Date(time * 1000);
   const currentTime = setTime(dateObj.getUTCHours(), dateObj.getMinutes());
 
-  const timeIntervals = [
-    { start: setTime(4, 30), end: setTime(6, 0), part: "dawn" },
-    { start: setTime(6, 0), end: setTime(7, 0), part: "sunrise" },
-    { start: setTime(7, 0), end: setTime(9, 0), part: "earlyMorning" },
-    { start: setTime(9, 0), end: setTime(11, 0), part: "midMorning" },
-    { start: setTime(11, 0), end: setTime(13, 0), part: "noon" },
-    { start: setTime(13, 0), end: setTime(15, 0), part: "earlyAfternoon" },
-    { start: setTime(15, 0), end: setTime(18, 0), part: "lateAfternoon" },
-    { start: setTime(18, 0), end: setTime(18, 30), part: "sunset" },
-    { start: setTime(18, 30), end: setTime(20, 0), part: "dusk" },
-    { start: setTime(20, 0), end: setTime(22, 0), part: "earlyNight" },
-  ];
+  if (weather == "Rain") {
+    const timeIntervals = [
+      { start: setTime(4, 30), end: setTime(6, 0), part: "dawn" },
+      { start: setTime(6, 0), end: setTime(7, 0), part: "sunrise" },
+      { start: setTime(7, 0), end: setTime(9, 0), part: "earlyMorning" },
+      { start: setTime(9, 0), end: setTime(11, 0), part: "midMorning" },
+      { start: setTime(11, 0), end: setTime(13, 0), part: "noon" },
+      { start: setTime(13, 0), end: setTime(15, 0), part: "earlyAfternoon" },
+      { start: setTime(15, 0), end: setTime(18, 0), part: "lateAfternoon" },
+      { start: setTime(18, 0), end: setTime(18, 30), part: "sunset" },
+      { start: setTime(18, 30), end: setTime(20, 0), part: "dusk" },
+      { start: setTime(20, 0), end: setTime(22, 0), part: "earlyNight" },
+    ];
 
-  for (const interval of timeIntervals) {
-    if (currentTime >= interval.start && currentTime <= interval.end) {
-      return interval.part;
+    for (const interval of timeIntervals) {
+      if (currentTime >= interval.start && currentTime <= interval.end) {
+        return interval.part;
+      }
     }
-  }
 
-  return "midnight";
+    return "midnight";
+  } else {
+    const timeIntervals = [
+      { start: setTime(4, 30), end: setTime(6, 0), part: "dawn" },
+      { start: setTime(6, 0), end: setTime(7, 0), part: "sunrise" },
+      { start: setTime(7, 0), end: setTime(9, 0), part: "earlyMorning" },
+      { start: setTime(9, 0), end: setTime(11, 0), part: "midMorning" },
+      { start: setTime(11, 0), end: setTime(13, 0), part: "noon" },
+      { start: setTime(13, 0), end: setTime(15, 0), part: "earlyAfternoon" },
+      { start: setTime(15, 0), end: setTime(18, 0), part: "lateAfternoon" },
+      { start: setTime(18, 0), end: setTime(18, 30), part: "sunset" },
+      { start: setTime(18, 30), end: setTime(20, 0), part: "dusk" },
+      { start: setTime(20, 0), end: setTime(22, 0), part: "earlyNight" },
+    ];
+
+    for (const interval of timeIntervals) {
+      if (currentTime >= interval.start && currentTime <= interval.end) {
+        return interval.part;
+      }
+    }
+
+    return "midnight";
+  }
 };
 
 const updateWeather = async () => {
@@ -861,9 +871,9 @@ const updateWeather = async () => {
     const { main, description } = weatherInfo.weather[0];
     const { humidity, pressure, temp, feels_like } = weatherInfo.main;
     const windSpeed = weatherInfo.wind.speed;
-    const partOfDay = getPartOfDay(dt + timezone);
+    const partOfDay = getPartOfDay(dt + timezone, main);
     const newSkyController = skySettings[partOfDay];
-    const isRaining = main == "Rain";
+    isRaining = main == "Rain";
 
     Object.assign(skyController, {
       ...newSkyController,
@@ -872,7 +882,7 @@ const updateWeather = async () => {
     updateSky();
     updateDirectionalLight();
     updateCampfire(partOfDay);
-    updateRain(isRaining);
+    updateRain();
 
     console.log(partOfDay);
 
