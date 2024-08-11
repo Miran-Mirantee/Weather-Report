@@ -13,6 +13,7 @@ const api = "514e1ece08bcd2e992e2242256b805de";
 let city = "Samut Sakhon";
 let tempUnit = "c";
 let isRaining = false;
+let currentTime;
 
 /**
  * TODO:
@@ -275,96 +276,350 @@ const skySettings = {
     ambientLightColor: "#4c455f",
     elevationOffset: 0,
   },
+  rainingDawn: {
+    turbidity: 2.1,
+    rayleigh: 1.443,
+    mieCoefficient: 0.02,
+    mieDirectionalG: 0.25,
+    elevation: -90,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0.5,
+    sunColor: "#feda58",
+    ambientLightColor: "#9e8b76",
+    elevationOffset: 0,
+  },
+  rainingSunrise: {
+    turbidity: 0.5,
+    rayleigh: 1.542,
+    mieCoefficient: 0.007,
+    mieDirectionalG: 0.999,
+    elevation: -89.5,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0.5,
+    sunColor: "#ffe485",
+    ambientLightColor: "#898d90",
+    elevationOffset: 0,
+  },
+  rainingEarlyMorning: {
+    turbidity: 3.8,
+    rayleigh: 0.903,
+    mieCoefficient: 0.03,
+    mieDirectionalG: 1,
+    elevation: -60,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0.7,
+    sunColor: "#fef3cd",
+    ambientLightColor: "#5b84a4",
+    elevationOffset: 0,
+  },
+  rainingMidMorning: {
+    turbidity: 3.8,
+    rayleigh: 0.903,
+    mieCoefficient: 0.03,
+    mieDirectionalG: 1,
+    elevation: -30,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0.8,
+    sunColor: "#fff5d6",
+    ambientLightColor: "#5b84a4",
+    elevationOffset: 0,
+  },
+  rainingNoon: {
+    turbidity: 3.8,
+    rayleigh: 0.903,
+    mieCoefficient: 0.03,
+    mieDirectionalG: 1,
+    elevation: 0,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 1.0,
+    sunColor: "#fff5d6",
+    ambientLightColor: "#5b84a4",
+    elevationOffset: 0,
+  },
+  rainingEarlyAfternoon: {
+    turbidity: 4.5,
+    rayleigh: 0.903,
+    mieCoefficient: 0.055,
+    mieDirectionalG: 1,
+    elevation: 60.5301,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0.8,
+    sunColor: "#ffeba3",
+    ambientLightColor: "#5ba477",
+    elevationOffset: 0,
+  },
+  rainingLateAfternoon: {
+    turbidity: 5.3,
+    rayleigh: 3.263,
+    mieCoefficient: 0.073,
+    mieDirectionalG: 0.041,
+    elevation: 85,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0.7,
+    sunColor: "#ffdf6b",
+    ambientLightColor: "#a4a25b",
+    elevationOffset: 0,
+  },
+  rainingSunset: {
+    turbidity: 20,
+    rayleigh: 3.115,
+    mieCoefficient: 0.015,
+    mieDirectionalG: 0.999,
+    elevation: 90,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0.5,
+    sunColor: "#ff8e52",
+    ambientLightColor: "#a4695b",
+    elevationOffset: 2.6,
+  },
+  rainingDusk: {
+    turbidity: 9.9,
+    rayleigh: 0.804,
+    mieCoefficient: 0.015,
+    mieDirectionalG: 0.999,
+    elevation: 96,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0,
+    sunColor: "#ff8e52",
+    ambientLightColor: "#5a536a",
+    elevationOffset: 0,
+  },
+  rainingEarlyNight: {
+    turbidity: 20,
+    rayleigh: 4,
+    mieCoefficient: 0.015,
+    mieDirectionalG: 0.999,
+    elevation: 108,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0,
+    sunColor: "#ff8e52",
+    ambientLightColor: "#4c455f",
+    elevationOffset: 0,
+  },
+  rainingMidnight: {
+    turbidity: 20,
+    rayleigh: 0,
+    mieCoefficient: 0.1,
+    mieDirectionalG: 0.999,
+    elevation: 180,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0,
+    sunColor: "#ff8e52",
+    ambientLightColor: "#4c455f",
+    elevationOffset: 0,
+  },
+  snowingDawn: {
+    turbidity: 2.1,
+    rayleigh: 1.443,
+    mieCoefficient: 0.02,
+    mieDirectionalG: 0.25,
+    elevation: -90,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 2.5,
+    sunColor: "#feda58",
+    ambientLightColor: "#9e8b76",
+    elevationOffset: 0,
+  },
+  snowingSunrise: {
+    turbidity: 0.5,
+    rayleigh: 1.542,
+    mieCoefficient: 0.007,
+    mieDirectionalG: 0.999,
+    elevation: -89.5,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 3,
+    sunColor: "#ffe485",
+    ambientLightColor: "#898d90",
+    elevationOffset: 0,
+  },
+  snowingEarlyMorning: {
+    turbidity: 3.8,
+    rayleigh: 0.903,
+    mieCoefficient: 0.03,
+    mieDirectionalG: 1,
+    elevation: -60,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 3.2,
+    sunColor: "#fef3cd",
+    ambientLightColor: "#5b84a4",
+    elevationOffset: 0,
+  },
+  snowingMidMorning: {
+    turbidity: 3.8,
+    rayleigh: 0.903,
+    mieCoefficient: 0.03,
+    mieDirectionalG: 1,
+    elevation: -30,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 3.3,
+    sunColor: "#fff5d6",
+    ambientLightColor: "#5b84a4",
+    elevationOffset: 0,
+  },
+  snowingNoon: {
+    turbidity: 3.8,
+    rayleigh: 0.903,
+    mieCoefficient: 0.03,
+    mieDirectionalG: 1,
+    elevation: 0,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 3.5,
+    sunColor: "#fff5d6",
+    ambientLightColor: "#5b84a4",
+    elevationOffset: 0,
+  },
+  snowingEarlyAfternoon: {
+    turbidity: 4.5,
+    rayleigh: 0.903,
+    mieCoefficient: 0.055,
+    mieDirectionalG: 1,
+    elevation: 60.5301,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 3.3,
+    sunColor: "#ffeba3",
+    ambientLightColor: "#5ba477",
+    elevationOffset: 0,
+  },
+  snowingLateAfternoon: {
+    turbidity: 5.3,
+    rayleigh: 3.263,
+    mieCoefficient: 0.073,
+    mieDirectionalG: 0.041,
+    elevation: 85,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 3.2,
+    sunColor: "#ffdf6b",
+    ambientLightColor: "#a4a25b",
+    elevationOffset: 0,
+  },
+  snowingSunset: {
+    turbidity: 20,
+    rayleigh: 3.115,
+    mieCoefficient: 0.015,
+    mieDirectionalG: 0.999,
+    elevation: 90,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 3,
+    sunColor: "#ff8e52",
+    ambientLightColor: "#a4695b",
+    elevationOffset: 2.6,
+  },
+  snowingDusk: {
+    turbidity: 9.9,
+    rayleigh: 0.804,
+    mieCoefficient: 0.015,
+    mieDirectionalG: 0.999,
+    elevation: 96,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0,
+    sunColor: "#ff8e52",
+    ambientLightColor: "#5a536a",
+    elevationOffset: 0,
+  },
+  snowingEarlyNight: {
+    turbidity: 20,
+    rayleigh: 4,
+    mieCoefficient: 0.015,
+    mieDirectionalG: 0.999,
+    elevation: 108,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0,
+    sunColor: "#ff8e52",
+    ambientLightColor: "#4c455f",
+    elevationOffset: 0,
+  },
+  snowingMidnight: {
+    turbidity: 20,
+    rayleigh: 0,
+    mieCoefficient: 0.1,
+    mieDirectionalG: 0.999,
+    elevation: 180,
+    azimuth: 17,
+    exposure: renderer.toneMappingExposure,
+    lightIntensity: 0,
+    sunColor: "#ff8e52",
+    ambientLightColor: "#4c455f",
+    elevationOffset: 0,
+  },
 };
 
 const skyDebug = {};
 skyDebug.dawnChange = () => {
-  Object.assign(skyController, skySettings.dawn);
-  updateSky();
-  updateDirectionalLight();
-  updateAmbientLight();
-  updateRain();
-  campfireObject.campfireOn();
+  if (isRaining) {
+    Object.assign(skyController, skySettings.rainingDawn);
+    currentTime = "rainingDawn";
+  } else {
+    Object.assign(skyController, skySettings.dawn);
+    currentTime = "dawn";
+  }
+  updateScene();
 };
 skyDebug.sunriseChange = () => {
-  Object.assign(skyController, skySettings.sunrise);
-  updateSky();
-  updateDirectionalLight();
-  updateAmbientLight();
-  updateRain();
-  campfireObject.campfireOn();
+  if (isRaining) {
+    Object.assign(skyController, skySettings.rainingSunrise);
+    currentTime = "rainingSunrise";
+  } else {
+    Object.assign(skyController, skySettings.sunrise);
+    currentTime = "sunrise";
+  }
+  updateScene();
 };
 skyDebug.earlyMorningChange = () => {
   Object.assign(skyController, skySettings.earlyMorning);
-  updateSky();
-  updateDirectionalLight();
-  updateAmbientLight();
-  updateRain();
-  campfireObject.killCampfire();
+  updateScene();
 };
 skyDebug.midMorningChange = () => {
   Object.assign(skyController, skySettings.midMorning);
-  updateSky();
-  updateDirectionalLight();
-  updateAmbientLight();
-  updateRain();
-  campfireObject.killCampfire();
+  updateScene();
 };
 skyDebug.noonChange = () => {
   Object.assign(skyController, skySettings.noon);
-  updateSky();
-  updateDirectionalLight();
-  updateAmbientLight();
-  updateRain();
-  campfireObject.campfireOn();
+  updateScene();
 };
 skyDebug.earlyAfternoonChange = () => {
   Object.assign(skyController, skySettings.earlyAfternoon);
-  updateSky();
-  updateDirectionalLight();
-  updateAmbientLight();
-  updateRain();
-  campfireObject.killCampfire();
+  updateScene();
 };
 skyDebug.lateAfternoonChange = () => {
   Object.assign(skyController, skySettings.lateAfternoon);
-  updateSky();
-  updateDirectionalLight();
-  updateAmbientLight();
-  updateRain();
-  campfireObject.killCampfire();
+  updateScene();
 };
 skyDebug.sunsetChange = () => {
   Object.assign(skyController, skySettings.sunset);
-  updateSky();
-  updateDirectionalLight();
-  updateAmbientLight();
-  updateRain();
-  campfireObject.campfireOn();
+  updateScene();
 };
 skyDebug.duskChange = () => {
   Object.assign(skyController, skySettings.dusk);
-  updateSky();
-  updateDirectionalLight();
-  updateAmbientLight();
-  updateRain();
-  campfireObject.campfireOn();
+  updateScene();
 };
 skyDebug.earlyNightChange = () => {
   Object.assign(skyController, skySettings.earlyNight);
-  updateSky();
-  updateDirectionalLight();
-  updateAmbientLight();
-  updateRain();
-  campfireObject.campfireOn();
+  updateScene();
 };
 skyDebug.midnightChange = () => {
   Object.assign(skyController, skySettings.midnight);
-  updateSky();
-  updateDirectionalLight();
-  updateAmbientLight();
-  updateRain();
-  campfireObject.campfireOn();
+  updateScene();
 };
 
 gui.add(skyDebug, "dawnChange");
@@ -384,8 +639,6 @@ scene.add(sky);
 sky.scale.setScalar(5000);
 
 const updateSky = () => {
-  console.log("isRaining", isRaining);
-
   const uniforms = sky.material.uniforms;
   uniforms["turbidity"].value = skyController.turbidity;
   uniforms["rayleigh"].value = skyController.rayleigh;
@@ -448,10 +701,7 @@ gui
 
 const updateDirectionalLight = () => {
   directionalLight.position.copy(directionalLightPosition);
-  directionalLight.intensity = Math.max(
-    skyController.lightIntensity - (isRaining ? 2.5 : 0),
-    0
-  );
+  directionalLight.intensity = skyController.lightIntensity;
   directionalLight.color.set(new THREE.Color(skyController.sunColor));
 };
 
@@ -549,6 +799,18 @@ const updateCampfire = (partOfDay) => {
       campfireObject.killCampfire();
       break;
     case "lateAfternoon":
+      campfireObject.killCampfire();
+      break;
+    case "rainingEarlyMorning":
+      campfireObject.killCampfire();
+      break;
+    case "rainingMidMorning":
+      campfireObject.killCampfire();
+      break;
+    case "rainingEarlyAfternoon":
+      campfireObject.killCampfire();
+      break;
+    case "rainingLateAfternoon":
       campfireObject.killCampfire();
       break;
     default:
@@ -656,21 +918,40 @@ rainObject.color = "#7ff0e8";
 rainObject.toggleRain = () => {
   rain.visible = !rain.visible;
   isRaining = rain.visible;
-  updateDirectionalLight();
+  currentTime = toggleRainOfDay(currentTime);
+  console.log(currentTime);
+  const newSkyController = skySettings[currentTime];
+  Object.assign(skyController, {
+    ...newSkyController,
+  });
+
+  updateSky();
 };
 rainObject.rainOn = () => {
   rain.visible = true;
-  updateDirectionalLight();
+  isRaining = rain.visible;
 };
 rainObject.rainOff = () => {
   rain.visible = false;
-  updateDirectionalLight();
+  isRaining = rain.visible;
 };
 rainObject.additiveBlendingChange = () => {
   rainMaterial.blending = THREE.AdditiveBlending;
 };
 rainObject.normalBlendingChange = () => {
   rainMaterial.blending = THREE.NormalBlending;
+};
+
+const toggleRainOfDay = (partOfDay) => {
+  if (partOfDay.startsWith("raining")) {
+    // Remove "raining" prefix and convert the first letter of the remaining part to lowercase
+    return partOfDay
+      .replace("raining", "")
+      .replace(/^./, (str) => str.toLowerCase());
+  } else {
+    // Add "raining" prefix and capitalize the first letter of partOfDay
+    return "raining" + partOfDay.replace(/^./, (str) => str.toUpperCase());
+  }
 };
 
 gui.add(rainObject, "toggleRain");
@@ -747,6 +1028,14 @@ const updateRain = () => {
   }
 };
 
+const updateScene = () => {
+  updateSky();
+  updateDirectionalLight();
+  updateAmbientLight();
+  updateRain();
+  updateCampfire(currentTime);
+};
+
 // Animate
 const clock = new THREE.Clock();
 
@@ -820,16 +1109,24 @@ const getPartOfDay = (time, weather) => {
 
   if (weather == "Rain") {
     const timeIntervals = [
-      { start: setTime(4, 30), end: setTime(6, 0), part: "dawn" },
-      { start: setTime(6, 0), end: setTime(7, 0), part: "sunrise" },
-      { start: setTime(7, 0), end: setTime(9, 0), part: "earlyMorning" },
-      { start: setTime(9, 0), end: setTime(11, 0), part: "midMorning" },
-      { start: setTime(11, 0), end: setTime(13, 0), part: "noon" },
-      { start: setTime(13, 0), end: setTime(15, 0), part: "earlyAfternoon" },
-      { start: setTime(15, 0), end: setTime(18, 0), part: "lateAfternoon" },
-      { start: setTime(18, 0), end: setTime(18, 30), part: "sunset" },
-      { start: setTime(18, 30), end: setTime(20, 0), part: "dusk" },
-      { start: setTime(20, 0), end: setTime(22, 0), part: "earlyNight" },
+      { start: setTime(4, 30), end: setTime(6, 0), part: "rainingDawn" },
+      { start: setTime(6, 0), end: setTime(7, 0), part: "rainingSunrise" },
+      { start: setTime(7, 0), end: setTime(9, 0), part: "rainingEarlyMorning" },
+      { start: setTime(9, 0), end: setTime(11, 0), part: "rainingMidMorning" },
+      { start: setTime(11, 0), end: setTime(13, 0), part: "rainingNoon" },
+      {
+        start: setTime(13, 0),
+        end: setTime(15, 0),
+        part: "rainingEarlyAfternoon",
+      },
+      {
+        start: setTime(15, 0),
+        end: setTime(18, 0),
+        part: "rainingLateAfternoon",
+      },
+      { start: setTime(18, 0), end: setTime(18, 30), part: "rainingSunset" },
+      { start: setTime(18, 30), end: setTime(20, 0), part: "rainingDusk" },
+      { start: setTime(20, 0), end: setTime(22, 0), part: "rainingEarlyNight" },
     ];
 
     for (const interval of timeIntervals) {
@@ -838,7 +1135,7 @@ const getPartOfDay = (time, weather) => {
       }
     }
 
-    return "midnight";
+    return "rainingMidnight";
   } else {
     const timeIntervals = [
       { start: setTime(4, 30), end: setTime(6, 0), part: "dawn" },
@@ -872,6 +1169,7 @@ const updateWeather = async () => {
     const { humidity, pressure, temp, feels_like } = weatherInfo.main;
     const windSpeed = weatherInfo.wind.speed;
     const partOfDay = getPartOfDay(dt + timezone, main);
+    currentTime = partOfDay;
     const newSkyController = skySettings[partOfDay];
     isRaining = main == "Rain";
 
@@ -879,10 +1177,7 @@ const updateWeather = async () => {
       ...newSkyController,
     });
 
-    updateSky();
-    updateDirectionalLight();
-    updateCampfire(partOfDay);
-    updateRain();
+    updateScene();
 
     console.log(partOfDay);
 
