@@ -12,6 +12,7 @@ import "./style.css";
 const api = "514e1ece08bcd2e992e2242256b805de";
 let city = "bangkok";
 let tempUnit = "c";
+let isRaining = false;
 
 /**
  * TODO:
@@ -19,6 +20,7 @@ let tempUnit = "c";
  *  - add campfire smoke
  *  - add snow particle
  *  - add anti-aliasing
+ *  - fix changing unit type call update weather()
  */
 
 // gui
@@ -431,10 +433,12 @@ gui
     directionalLight.color.set(new THREE.Color(skyController.sunColor));
   });
 
-const updateDirectionalLight = (isRaining) => {
+const updateDirectionalLight = () => {
   directionalLight.position.copy(directionalLightPosition);
-  directionalLight.intensity =
-    skyController.lightIntensity - (isRaining ? 2.5 : 0);
+  directionalLight.intensity = Math.max(
+    skyController.lightIntensity - (isRaining ? 2.5 : 0),
+    0
+  );
   directionalLight.color.set(new THREE.Color(skyController.sunColor));
 };
 
@@ -467,21 +471,21 @@ gui
   .add(skyController, "elevation", -180, 180, 0.0001)
   .onChange(() => {
     updateSky();
-    updateDirectionalLight(rain.visible);
+    updateDirectionalLight();
   })
   .listen();
 gui
   .add(skyController, "elevationOffset", -180, 180, 0.0001)
   .onChange(() => {
     updateSky();
-    updateDirectionalLight(rain.visible);
+    updateDirectionalLight();
   })
   .listen();
 gui
   .add(skyController, "azimuth", -180, 180, 0.01)
   .onChange(() => {
     updateSky();
-    updateDirectionalLight(rain.visible);
+    updateDirectionalLight();
   })
   .listen();
 gui.add(skyController, "exposure", 0, 1, 0.0001).onChange(updateSky).listen();
@@ -638,15 +642,18 @@ rainObject.count = 10000;
 rainObject.color = "#7ff0e8";
 rainObject.toggleRain = () => {
   rain.visible = !rain.visible;
-  updateDirectionalLight(rain.visible);
+  isRaining = rain.visible;
+  updateDirectionalLight();
 };
 rainObject.rainOn = () => {
   rain.visible = true;
-  updateDirectionalLight(rain.visible);
+  isRaining = rain.visible;
+  updateDirectionalLight();
 };
 rainObject.rainOff = () => {
   rain.visible = false;
-  updateDirectionalLight(rain.visible);
+  isRaining = rain.visible;
+  updateDirectionalLight();
 };
 rainObject.additiveBlendingChange = () => {
   rainMaterial.blending = THREE.AdditiveBlending;
@@ -715,7 +722,7 @@ rainGeometry.setAttribute(
 );
 
 const rain = new THREE.Points(rainGeometry, rainMaterial);
-rain.visible = false;
+rain.visible = isRaining;
 scene.add(rain);
 // rain.position.x = 1.076;
 // rain.position.y = 1;
@@ -863,7 +870,7 @@ const updateWeather = async () => {
     });
 
     updateSky();
-    updateDirectionalLight(rain.visible);
+    updateDirectionalLight();
     updateCampfire(partOfDay);
     updateRain(isRaining);
 
