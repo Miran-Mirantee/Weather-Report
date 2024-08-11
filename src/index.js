@@ -586,39 +586,93 @@ skyDebug.sunriseChange = () => {
   updateScene();
 };
 skyDebug.earlyMorningChange = () => {
-  Object.assign(skyController, skySettings.earlyMorning);
+  if (isRaining) {
+    Object.assign(skyController, skySettings.rainingEarlyMorning);
+    currentTime = "rainingEarlyMorning";
+  } else {
+    Object.assign(skyController, skySettings.earlyMorning);
+    currentTime = "earlyMorning";
+  }
   updateScene();
 };
 skyDebug.midMorningChange = () => {
-  Object.assign(skyController, skySettings.midMorning);
+  if (isRaining) {
+    Object.assign(skyController, skySettings.rainingMidMorning);
+    currentTime = "rainingMidMorning";
+  } else {
+    Object.assign(skyController, skySettings.midMorning);
+    currentTime = "midMorning";
+  }
   updateScene();
 };
 skyDebug.noonChange = () => {
-  Object.assign(skyController, skySettings.noon);
+  if (isRaining) {
+    Object.assign(skyController, skySettings.rainingNoon);
+    currentTime = "rainingNoon";
+  } else {
+    Object.assign(skyController, skySettings.noon);
+    currentTime = "noon";
+  }
   updateScene();
 };
 skyDebug.earlyAfternoonChange = () => {
-  Object.assign(skyController, skySettings.earlyAfternoon);
+  if (isRaining) {
+    Object.assign(skyController, skySettings.rainingEarlyAfternoon);
+    currentTime = "rainingEarlyAfternoon";
+  } else {
+    Object.assign(skyController, skySettings.earlyAfternoon);
+    currentTime = "earlyAfternoon";
+  }
   updateScene();
 };
 skyDebug.lateAfternoonChange = () => {
-  Object.assign(skyController, skySettings.lateAfternoon);
+  if (isRaining) {
+    Object.assign(skyController, skySettings.rainingLateAfternoon);
+    currentTime = "rainingLateAfternoon";
+  } else {
+    Object.assign(skyController, skySettings.lateAfternoon);
+    currentTime = "lateAfternoon";
+  }
   updateScene();
 };
 skyDebug.sunsetChange = () => {
-  Object.assign(skyController, skySettings.sunset);
+  if (isRaining) {
+    Object.assign(skyController, skySettings.rainingSunset);
+    currentTime = "rainingSunset";
+  } else {
+    Object.assign(skyController, skySettings.sunset);
+    currentTime = "sunset";
+  }
   updateScene();
 };
 skyDebug.duskChange = () => {
-  Object.assign(skyController, skySettings.dusk);
+  if (isRaining) {
+    Object.assign(skyController, skySettings.rainingDusk);
+    currentTime = "rainingDusk";
+  } else {
+    Object.assign(skyController, skySettings.dusk);
+    currentTime = "dusk";
+  }
   updateScene();
 };
 skyDebug.earlyNightChange = () => {
-  Object.assign(skyController, skySettings.earlyNight);
+  if (isRaining) {
+    Object.assign(skyController, skySettings.rainingEarlyNight);
+    currentTime = "rainingEarlyNight";
+  } else {
+    Object.assign(skyController, skySettings.earlyNight);
+    currentTime = "earlyNight";
+  }
   updateScene();
 };
 skyDebug.midnightChange = () => {
-  Object.assign(skyController, skySettings.midnight);
+  if (isRaining) {
+    Object.assign(skyController, skySettings.rainingMidnight);
+    currentTime = "rainingMidnight";
+  } else {
+    Object.assign(skyController, skySettings.midnight);
+    currentTime = "midnight";
+  }
   updateScene();
 };
 
@@ -919,13 +973,12 @@ rainObject.toggleRain = () => {
   rain.visible = !rain.visible;
   isRaining = rain.visible;
   currentTime = toggleRainOfDay(currentTime);
-  console.log(currentTime);
   const newSkyController = skySettings[currentTime];
   Object.assign(skyController, {
     ...newSkyController,
   });
 
-  updateSky();
+  updateScene();
 };
 rainObject.rainOn = () => {
   rain.visible = true;
