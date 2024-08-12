@@ -17,7 +17,6 @@ let currentTime;
 
 /**
  * TODO:
- *  - add rain particle
  *  - add campfire smoke
  *  - add snow particle
  *  - add anti-aliasing
@@ -26,6 +25,13 @@ let currentTime;
 
 // gui
 const gui = new GUI();
+const sunAndSkySettings = gui.addFolder("Sun & Sky settings");
+const campfireSettings = gui.addFolder("Campfire settings");
+const rainSettings = gui.addFolder("Rain settings");
+gui.close();
+sunAndSkySettings.close();
+campfireSettings.close();
+rainSettings.close();
 
 /**
  * Webgl
@@ -676,17 +682,17 @@ skyDebug.midnightChange = () => {
   updateScene();
 };
 
-gui.add(skyDebug, "dawnChange");
-gui.add(skyDebug, "sunriseChange");
-gui.add(skyDebug, "earlyMorningChange");
-gui.add(skyDebug, "midMorningChange");
-gui.add(skyDebug, "noonChange");
-gui.add(skyDebug, "earlyAfternoonChange");
-gui.add(skyDebug, "lateAfternoonChange");
-gui.add(skyDebug, "sunsetChange");
-gui.add(skyDebug, "duskChange");
-gui.add(skyDebug, "earlyNightChange");
-gui.add(skyDebug, "midnightChange");
+sunAndSkySettings.add(skyDebug, "dawnChange");
+sunAndSkySettings.add(skyDebug, "sunriseChange");
+sunAndSkySettings.add(skyDebug, "earlyMorningChange");
+sunAndSkySettings.add(skyDebug, "midMorningChange");
+sunAndSkySettings.add(skyDebug, "noonChange");
+sunAndSkySettings.add(skyDebug, "earlyAfternoonChange");
+sunAndSkySettings.add(skyDebug, "lateAfternoonChange");
+sunAndSkySettings.add(skyDebug, "sunsetChange");
+sunAndSkySettings.add(skyDebug, "duskChange");
+sunAndSkySettings.add(skyDebug, "earlyNightChange");
+sunAndSkySettings.add(skyDebug, "midnightChange");
 
 const sky = new Sky();
 scene.add(sky);
@@ -718,7 +724,7 @@ const updateSky = () => {
 const ambientLight = new THREE.AmbientLight(skyController.ambientLightColor);
 scene.add(ambientLight);
 
-gui
+sunAndSkySettings
   .addColor(skyController, "ambientLightColor")
   .listen()
   .onChange(() => {
@@ -742,11 +748,11 @@ directionalLight.shadow.camera.far = 16;
 directionalLight.shadow.camera.top = 5.5;
 scene.add(directionalLight);
 
-gui
+sunAndSkySettings
   .add(directionalLight, "intensity", 0, 10, 0.01)
   .listen()
   .name("sunlight intensity");
-gui
+sunAndSkySettings
   .addColor(skyController, "sunColor")
   .listen()
   .onChange(() => {
@@ -771,41 +777,47 @@ const directionalLightCameraHelper = new THREE.CameraHelper(
 directionalLightCameraHelper.visible = false;
 scene.add(directionalLightCameraHelper);
 
-gui
+sunAndSkySettings
   .add(skyController, "turbidity", 0.0, 20.0, 0.1)
   .onChange(updateSky)
   .listen();
-gui.add(skyController, "rayleigh", 0.0, 4, 0.001).onChange(updateSky).listen();
-gui
+sunAndSkySettings
+  .add(skyController, "rayleigh", 0.0, 4, 0.001)
+  .onChange(updateSky)
+  .listen();
+sunAndSkySettings
   .add(skyController, "mieCoefficient", 0.0, 0.1, 0.001)
   .onChange(updateSky)
   .listen();
-gui
+sunAndSkySettings
   .add(skyController, "mieDirectionalG", 0.0, 1, 0.001)
   .onChange(updateSky)
   .listen();
-gui
+sunAndSkySettings
   .add(skyController, "elevation", -180, 180, 0.0001)
   .onChange(() => {
     updateSky();
     updateDirectionalLight();
   })
   .listen();
-gui
+sunAndSkySettings
   .add(skyController, "elevationOffset", -180, 180, 0.0001)
   .onChange(() => {
     updateSky();
     updateDirectionalLight();
   })
   .listen();
-gui
+sunAndSkySettings
   .add(skyController, "azimuth", -180, 180, 0.01)
   .onChange(() => {
     updateSky();
     updateDirectionalLight();
   })
   .listen();
-gui.add(skyController, "exposure", 0, 1, 0.0001).onChange(updateSky).listen();
+sunAndSkySettings
+  .add(skyController, "exposure", 0, 1, 0.0001)
+  .onChange(updateSky)
+  .listen();
 
 /**
  * Campfire
@@ -833,7 +845,7 @@ campfireObject.campfireOn = () => {
   pointLight.visible = true;
 };
 
-gui.add(campfireObject, "toggleCampfire");
+campfireSettings.add(campfireObject, "toggleCampfire");
 
 const updateCampfire = (partOfDay) => {
   switch (partOfDay) {
@@ -898,23 +910,23 @@ const flameMaterial = new THREE.ShaderMaterial({
   blending: THREE.AdditiveBlending,
 });
 
-gui
+campfireSettings
   .add(flameMaterial.uniforms.uGradientMultiply, "value", 1.0, 2.0, 0.001)
   .name("uGradientMultiply");
-gui
+campfireSettings
   .add(flameMaterial.uniforms.uColumnMultiply, "value", 1.0, 4.0, 0.001)
   .name("uColumnMultiply");
-gui.addColor(campfireObject, "flameFirstColor").onChange(() => {
+campfireSettings.addColor(campfireObject, "flameFirstColor").onChange(() => {
   flameMaterial.uniforms.uFirstColor.value.set(
     new THREE.Color(campfireObject.flameFirstColor)
   );
 });
-gui.addColor(campfireObject, "flameSecondColor").onChange(() => {
+campfireSettings.addColor(campfireObject, "flameSecondColor").onChange(() => {
   flameMaterial.uniforms.uSecondColor.value.set(
     new THREE.Color(campfireObject.flameSecondColor)
   );
 });
-gui.addColor(campfireObject, "flameThirdColor").onChange(() => {
+campfireSettings.addColor(campfireObject, "flameThirdColor").onChange(() => {
   flameMaterial.uniforms.uThirdColor.value.set(
     new THREE.Color(campfireObject.flameThirdColor)
   );
@@ -954,9 +966,13 @@ const pointLightCameraHelper = new THREE.CameraHelper(pointLight.shadow.camera);
 pointLightCameraHelper.visible = false;
 scene.add(pointLightCameraHelper);
 
-gui.add(pointLight, "intensity", 0, 20, 0.001).name("campfire light intensity");
-gui.add(pointLight, "decay", 0, 5, 0.0001).name("campfire light decay");
-gui
+campfireSettings
+  .add(pointLight, "intensity", 0, 20, 0.001)
+  .name("campfire light intensity");
+campfireSettings
+  .add(pointLight, "decay", 0, 5, 0.0001)
+  .name("campfire light decay");
+campfireSettings
   .addColor(campfireObject, "pointLightColor")
   .onChange(() => {
     pointLight.color.set(new THREE.Color(campfireObject.color));
@@ -1007,9 +1023,9 @@ const toggleRainOfDay = (partOfDay) => {
   }
 };
 
-gui.add(rainObject, "toggleRain");
-gui.add(rainObject, "additiveBlendingChange");
-gui.add(rainObject, "normalBlendingChange");
+rainSettings.add(rainObject, "toggleRain");
+rainSettings.add(rainObject, "additiveBlendingChange");
+rainSettings.add(rainObject, "normalBlendingChange");
 
 const rainMaterial = new THREE.ShaderMaterial({
   vertexShader: rainVertexShader,
@@ -1029,19 +1045,19 @@ const rainMaterial = new THREE.ShaderMaterial({
   // blending: THREE.AdditiveBlending,
 });
 
-gui
+rainSettings
   .add(rainMaterial.uniforms.uSize, "value", 0, 2000, 0.01)
   .name("rain particle size");
-gui
+rainSettings
   .add(rainMaterial.uniforms.uSpeed, "value", 0, 9.0, 0.01)
   .name("rain particle speed");
-gui
+rainSettings
   .add(rainMaterial.uniforms.uLength, "value", 0, 0.8, 0.01)
   .name("rain particle trail length");
-gui
+rainSettings
   .add(rainMaterial.uniforms.uOpacity, "value", 0, 1, 0.01)
   .name("rain particle opacity");
-gui
+rainSettings
   .addColor(rainObject, "color")
   .name("rain color")
   .onChange(() => {
