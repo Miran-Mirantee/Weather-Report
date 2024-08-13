@@ -11,13 +11,11 @@ import snowVertexShader from "./shaders/snow/vertex.glsl";
 import snowFragmentShader from "./shaders/snow/fragment.glsl";
 import "./style.css";
 
-console.log(snowVertexShader);
-console.log(snowFragmentShader);
-
 const api = "514e1ece08bcd2e992e2242256b805de";
 let city = "Samut Sakhon";
 let tempUnit = "c";
 let isRaining = false;
+let isSnowing = false;
 let currentTime;
 
 /**
@@ -82,7 +80,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  // const controls = new OrbitControls(camera, canvasDom);
+  const controls = new OrbitControls(camera, canvasDom);
   const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
@@ -1102,6 +1100,55 @@ const updateRain = () => {
   }
 };
 
+/**
+ * Snow
+ */
+const snowObject = {};
+snowObject.count = 1000;
+snowObject.color = "#fff";
+
+const snowMaterial = new THREE.ShaderMaterial({
+  vertexShader: snowVertexShader,
+  fragmentShader: snowFragmentShader,
+  uniforms: {
+    uSize: new THREE.Uniform(100),
+    uPixelRatio: new THREE.Uniform(Math.min(window.devicePixelRatio, 2)),
+    uTime: new THREE.Uniform(0),
+    uColor: new THREE.Uniform(new THREE.Color(snowObject.color)),
+  },
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  transparent: true,
+});
+
+const snowGeometry = new THREE.BufferGeometry();
+const snowPositionArray = new Float32Array(snowObject.count * 3);
+const snowScaleArray = new Float32Array(snowObject.count);
+
+for (let i = 0; i < snowObject.count; i++) {
+  const r = 3.64 * Math.sqrt(Math.random());
+  const theta = Math.random() * 2 * Math.PI;
+
+  const i3 = i * 3;
+  snowPositionArray[i3] = -0.168078 + r * Math.cos(theta);
+  snowPositionArray[i3 + 1] = Math.random() * 3.5;
+  snowPositionArray[i3 + 2] = 1.25025 + r * Math.sin(theta);
+
+  snowScaleArray[i] = Math.random();
+}
+
+snowGeometry.setAttribute(
+  "position",
+  new THREE.BufferAttribute(snowPositionArray, 3)
+);
+snowGeometry.setAttribute(
+  "aScale",
+  new THREE.BufferAttribute(snowScaleArray, 1)
+);
+
+const snow = new THREE.Points(snowGeometry, snowMaterial);
+scene.add(snow);
+
 const updateScene = () => {
   updateSky();
   updateDirectionalLight();
@@ -1124,6 +1171,7 @@ const tick = () => {
   // Update time
   flameMaterial.uniforms.uTime.value = elapsedTime;
   rainMaterial.uniforms.uTime.value = elapsedTime;
+  snowMaterial.uniforms.uTime.value = elapsedTime;
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
@@ -1246,6 +1294,7 @@ const updateWeather = async () => {
     currentTime = partOfDay;
     const newSkyController = skySettings[partOfDay];
     isRaining = main == "Rain";
+    isSnowing = main == "Snow";
 
     Object.assign(skyController, {
       ...newSkyController,
