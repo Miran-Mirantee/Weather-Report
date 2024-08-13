@@ -7,7 +7,12 @@ import flameVertexShader from "./shaders/flame/vertex.glsl";
 import flameFragmentShader from "./shaders/flame/fragment.glsl";
 import rainVertexShader from "./shaders/rain/vertex.glsl";
 import rainFragmentShader from "./shaders/rain/fragment.glsl";
+import snowVertexShader from "./shaders/snow/vertex.glsl";
+import snowFragmentShader from "./shaders/snow/fragment.glsl";
 import "./style.css";
+
+console.log(snowVertexShader);
+console.log(snowFragmentShader);
 
 const api = "514e1ece08bcd2e992e2242256b805de";
 let city = "Samut Sakhon";
