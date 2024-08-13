@@ -31,6 +31,7 @@ const gui = new GUI();
 const sunAndSkySettings = gui.addFolder("Sun & Sky settings");
 const campfireSettings = gui.addFolder("Campfire settings");
 const rainSettings = gui.addFolder("Rain settings");
+const snowSettings = gui.addFolder("Snow settings");
 gui.close();
 sunAndSkySettings.close();
 campfireSettings.close();
@@ -80,7 +81,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  const controls = new OrbitControls(camera, canvasDom);
+  // const controls = new OrbitControls(camera, canvasDom);
   const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
@@ -1001,11 +1002,11 @@ rainObject.toggleRain = () => {
 };
 rainObject.rainOn = () => {
   rain.visible = true;
-  isRaining = rain.visible;
+  isRaining = true;
 };
 rainObject.rainOff = () => {
   rain.visible = false;
-  isRaining = rain.visible;
+  isRaining = false;
 };
 rainObject.additiveBlendingChange = () => {
   rainMaterial.blending = THREE.AdditiveBlending;
@@ -1106,12 +1107,42 @@ const updateRain = () => {
 const snowObject = {};
 snowObject.count = 1000;
 snowObject.color = "#fff";
+snowObject.toggleSnow = () => {
+  snow.visible = !snow.visible;
+  isSnowing = snow.visible;
+  // currentTime = toggleRainOfDay(currentTime);
+  // const newSkyController = skySettings[currentTime];
+  // Object.assign(skyController, {
+  //   ...newSkyController,
+  // });
+
+  updateScene();
+};
+snowObject.snowOn = () => {
+  snow.visible = true;
+  isSnowing = true;
+};
+snowObject.rainOff = () => {
+  snow.visible = false;
+  isSnowing = false;
+};
+snowObject.additiveBlendingChange = () => {
+  snowMaterial.blending = THREE.AdditiveBlending;
+};
+snowObject.normalBlendingChange = () => {
+  snowMaterial.blending = THREE.NormalBlending;
+};
+
+snowSettings.add(snowObject, "toggleSnow");
+snowSettings.add(snowObject, "additiveBlendingChange");
+snowSettings.add(snowObject, "normalBlendingChange");
 
 const snowMaterial = new THREE.ShaderMaterial({
   vertexShader: snowVertexShader,
   fragmentShader: snowFragmentShader,
   uniforms: {
     uSize: new THREE.Uniform(100),
+    uSpeed: new THREE.Uniform(1),
     uPixelRatio: new THREE.Uniform(Math.min(window.devicePixelRatio, 2)),
     uTime: new THREE.Uniform(0),
     uColor: new THREE.Uniform(new THREE.Color(snowObject.color)),
@@ -1120,6 +1151,22 @@ const snowMaterial = new THREE.ShaderMaterial({
   depthWrite: false,
   transparent: true,
 });
+
+snowSettings
+  .add(snowMaterial.uniforms.uSize, "value", 0, 200, 0.01)
+  .listen()
+  .name("snow particle size");
+snowSettings
+  .add(snowMaterial.uniforms.uSpeed, "value", 0, 10, 0.01)
+  .listen()
+  .name("snow particle speed");
+snowSettings
+  .addColor(snowObject, "color")
+  .listen()
+  .name("snow color")
+  .onChange(() => {
+    snowMaterial.uniforms.uColor.value.set(new THREE.Color(snowObject.color));
+  });
 
 const snowGeometry = new THREE.BufferGeometry();
 const snowPositionArray = new Float32Array(snowObject.count * 3);

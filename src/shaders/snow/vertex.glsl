@@ -1,4 +1,5 @@
 uniform float uSize;
+uniform float uSpeed;
 uniform float uPixelRatio;
 uniform float uTime;
 
@@ -6,7 +7,7 @@ attribute float aScale;
 
 void main() {
     vec3 newPosition = position;
-    newPosition.y -= uTime * ((1.0 - aScale) + 1.0);
+    newPosition.y -= uTime * ((1.0 - aScale) + 1.0) * uSpeed;
     newPosition.y = mod(newPosition.y, 3.5);
 
     newPosition.x -= sin(uTime * aScale) * pow(aScale, 3.0) * 0.5;
