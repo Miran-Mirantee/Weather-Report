@@ -33,6 +33,7 @@
     "lil-gui": "^0.19.2",
     "lodash": "^4.17.21",
     "three": "^0.167.0",
+    "three-custom-shader-material": "^5.4.0",
     "threejs-glsl-loader": "^1.0.4"
   }
 }

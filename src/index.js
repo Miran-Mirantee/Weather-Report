@@ -3,12 +3,15 @@ import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Sky } from "three/examples/jsm/objects/Sky";
+import CustomShaderMaterial from "three-custom-shader-material/vanilla";
 import flameVertexShader from "./shaders/flame/vertex.glsl";
 import flameFragmentShader from "./shaders/flame/fragment.glsl";
 import rainVertexShader from "./shaders/rain/vertex.glsl";
 import rainFragmentShader from "./shaders/rain/fragment.glsl";
 import snowVertexShader from "./shaders/snow/vertex.glsl";
 import snowFragmentShader from "./shaders/snow/fragment.glsl";
+import grassVertexShader from "./shaders/grass/vertex.glsl";
+import grassFragmentShader from "./shaders/grass/fragment.glsl";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
@@ -74,6 +77,10 @@ gradientTexture.flipY = false;
 
 let camera;
 
+const debugObject = {};
+debugObject.temp1 = 1;
+debugObject.temp2 = 1;
+debugObject.temp3 = 1;
 // Models
 gltfLoader.load("../static/camping.glb", (gltf) => {
   // Camera
@@ -81,13 +88,70 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  // const controls = new OrbitControls(camera, canvasDom);
+  const controls = new OrbitControls(camera, canvasDom);
   const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
     child.castShadow = true;
     child.material.side = 1;
   }
+  console.log(merged);
+
+  const tent = merged.children.find((child) => child.material.name == "tent");
+  console.log(tent);
+
+  const customTentMaterial = new CustomShaderMaterial({
+    // CSM
+    baseMaterial: THREE.MeshStandardMaterial,
+    silent: true,
+
+    // MeshStandardMaterial
+    ...tent.material,
+  });
+  tent.material = customTentMaterial;
+
+  const grass = merged.children.find((child) => child.material.name == "grass");
+
+  const customGrassMaterial = new CustomShaderMaterial({
+    // CSM
+    baseMaterial: THREE.MeshStandardMaterial,
+    silent: true,
+    vertexShader: grassVertexShader,
+    fragmentShader: grassFragmentShader,
+    uniforms: {
+      uPerlinTexture: new THREE.Uniform(perlinTexture),
+      uGrassColor: new THREE.Uniform(grass.material.color),
+      uSnowColor: new THREE.Uniform(new THREE.Color(snowObject.color)),
+      uTemp1: new THREE.Uniform(debugObject.temp1),
+      uTemp2: new THREE.Uniform(debugObject.temp2),
+      uTemp3: new THREE.Uniform(debugObject.temp3),
+    },
+
+    // MeshStandardMaterial
+    ...grass.material,
+  });
+  grass.material = customGrassMaterial;
+
+  gui
+    .add(customGrassMaterial.uniforms.uTemp1, "value", 0, 1, 0.001)
+    .name("temp1");
+  gui
+    .add(customGrassMaterial.uniforms.uTemp2, "value", 0, 1, 0.001)
+    .name("temp2");
+  gui
+    .add(customGrassMaterial.uniforms.uTemp3, "value", 1, 10, 0.001)
+    .name("temp3");
+
+  snowSettings
+    .addColor(snowObject, "color")
+    .listen()
+    .name("snow color")
+    .onChange(() => {
+      snowMaterial.uniforms.uColor.value.set(new THREE.Color(snowObject.color));
+      customGrassMaterial.uniforms.uSnowColor.value.set(
+        new THREE.Color(snowObject.color)
+      );
+    });
 
   const tentShade = gltf.scene.children.find(
     (child) => child.name == "tentShade"
@@ -1216,13 +1280,6 @@ snowSettings
   .add(snowMaterial.uniforms.uSpeed, "value", 0, 10, 0.01)
   .listen()
   .name("snow particle speed");
-snowSettings
-  .addColor(snowObject, "color")
-  .listen()
-  .name("snow color")
-  .onChange(() => {
-    snowMaterial.uniforms.uColor.value.set(new THREE.Color(snowObject.color));
-  });
 
 const snowGeometry = new THREE.BufferGeometry();
 const snowPositionArray = new Float32Array(snowObject.count * 3);
