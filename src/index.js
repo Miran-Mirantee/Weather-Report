@@ -430,92 +430,92 @@ const skySettings = {
     elevationOffset: 0,
   },
   snowingDawn: {
-    turbidity: 2.1,
-    rayleigh: 1.443,
+    turbidity: 16.6,
+    rayleigh: 0.952,
     mieCoefficient: 0.02,
     mieDirectionalG: 0.25,
     elevation: -90,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
-    lightIntensity: 2.5,
+    lightIntensity: 1.5,
     sunColor: "#feda58",
     ambientLightColor: "#9e8b76",
     elevationOffset: 0,
   },
   snowingSunrise: {
-    turbidity: 0.5,
-    rayleigh: 1.542,
+    turbidity: 0,
+    rayleigh: 4,
     mieCoefficient: 0.007,
     mieDirectionalG: 0.999,
     elevation: -89.5,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
-    lightIntensity: 3,
+    lightIntensity: 2,
     sunColor: "#ffe485",
     ambientLightColor: "#898d90",
     elevationOffset: 0,
   },
   snowingEarlyMorning: {
-    turbidity: 3.8,
-    rayleigh: 0.903,
+    turbidity: 20,
+    rayleigh: 3.115,
     mieCoefficient: 0.03,
     mieDirectionalG: 1,
     elevation: -60,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
-    lightIntensity: 3.2,
+    lightIntensity: 2.2,
     sunColor: "#fef3cd",
     ambientLightColor: "#5b84a4",
     elevationOffset: 0,
   },
   snowingMidMorning: {
-    turbidity: 3.8,
-    rayleigh: 0.903,
+    turbidity: 20,
+    rayleigh: 3.115,
     mieCoefficient: 0.03,
     mieDirectionalG: 1,
     elevation: -30,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
-    lightIntensity: 3.3,
+    lightIntensity: 2.3,
     sunColor: "#fff5d6",
     ambientLightColor: "#5b84a4",
     elevationOffset: 0,
   },
   snowingNoon: {
-    turbidity: 3.8,
-    rayleigh: 0.903,
+    turbidity: 20,
+    rayleigh: 3.115,
     mieCoefficient: 0.03,
     mieDirectionalG: 1,
     elevation: 0,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
-    lightIntensity: 3.5,
+    lightIntensity: 2.5,
     sunColor: "#fff5d6",
     ambientLightColor: "#5b84a4",
     elevationOffset: 0,
   },
   snowingEarlyAfternoon: {
-    turbidity: 4.5,
-    rayleigh: 0.903,
+    turbidity: 20,
+    rayleigh: 3.115,
     mieCoefficient: 0.055,
     mieDirectionalG: 1,
     elevation: 60.5301,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
-    lightIntensity: 3.3,
+    lightIntensity: 2.3,
     sunColor: "#ffeba3",
     ambientLightColor: "#5ba477",
     elevationOffset: 0,
   },
   snowingLateAfternoon: {
-    turbidity: 5.3,
-    rayleigh: 3.263,
+    turbidity: 20,
+    rayleigh: 3.115,
     mieCoefficient: 0.073,
     mieDirectionalG: 0.041,
     elevation: 85,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
-    lightIntensity: 3.2,
+    lightIntensity: 2.2,
     sunColor: "#ffdf6b",
     ambientLightColor: "#a4a25b",
     elevationOffset: 0,
@@ -528,9 +528,9 @@ const skySettings = {
     elevation: 90,
     azimuth: 17,
     exposure: renderer.toneMappingExposure,
-    lightIntensity: 3,
+    lightIntensity: 2,
     sunColor: "#ff8e52",
-    ambientLightColor: "#a4695b",
+    ambientLightColor: "#bd6751",
     elevationOffset: 2.6,
   },
   snowingDusk: {
@@ -543,7 +543,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 0,
     sunColor: "#ff8e52",
-    ambientLightColor: "#5a536a",
+    ambientLightColor: "#7d5a81",
     elevationOffset: 0,
   },
   snowingEarlyNight: {
@@ -556,7 +556,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 0,
     sunColor: "#ff8e52",
-    ambientLightColor: "#4c455f",
+    ambientLightColor: "#64436b",
     elevationOffset: 0,
   },
   snowingMidnight: {
@@ -569,7 +569,7 @@ const skySettings = {
     exposure: renderer.toneMappingExposure,
     lightIntensity: 0,
     sunColor: "#ff8e52",
-    ambientLightColor: "#4c455f",
+    ambientLightColor: "#64436b",
     elevationOffset: 0,
   },
 };
@@ -579,6 +579,9 @@ skyDebug.dawnChange = () => {
   if (isRaining) {
     Object.assign(skyController, skySettings.rainingDawn);
     currentTime = "rainingDawn";
+  } else if (isSnowing) {
+    Object.assign(skyController, skySettings.snowingDawn);
+    currentTime = "snowingDawn";
   } else {
     Object.assign(skyController, skySettings.dawn);
     currentTime = "dawn";
@@ -589,6 +592,9 @@ skyDebug.sunriseChange = () => {
   if (isRaining) {
     Object.assign(skyController, skySettings.rainingSunrise);
     currentTime = "rainingSunrise";
+  } else if (isSnowing) {
+    Object.assign(skyController, skySettings.snowingSunrise);
+    currentTime = "snowingSunrise";
   } else {
     Object.assign(skyController, skySettings.sunrise);
     currentTime = "sunrise";
@@ -599,6 +605,9 @@ skyDebug.earlyMorningChange = () => {
   if (isRaining) {
     Object.assign(skyController, skySettings.rainingEarlyMorning);
     currentTime = "rainingEarlyMorning";
+  } else if (isSnowing) {
+    Object.assign(skyController, skySettings.snowingEarlyMorning);
+    currentTime = "snowingEarlyMorning";
   } else {
     Object.assign(skyController, skySettings.earlyMorning);
     currentTime = "earlyMorning";
@@ -609,6 +618,9 @@ skyDebug.midMorningChange = () => {
   if (isRaining) {
     Object.assign(skyController, skySettings.rainingMidMorning);
     currentTime = "rainingMidMorning";
+  } else if (isSnowing) {
+    Object.assign(skyController, skySettings.snowingMidMorning);
+    currentTime = "snowingMidMorning";
   } else {
     Object.assign(skyController, skySettings.midMorning);
     currentTime = "midMorning";
@@ -619,6 +631,9 @@ skyDebug.noonChange = () => {
   if (isRaining) {
     Object.assign(skyController, skySettings.rainingNoon);
     currentTime = "rainingNoon";
+  } else if (isSnowing) {
+    Object.assign(skyController, skySettings.snowingNoon);
+    currentTime = "snowingNoon";
   } else {
     Object.assign(skyController, skySettings.noon);
     currentTime = "noon";
@@ -629,6 +644,9 @@ skyDebug.earlyAfternoonChange = () => {
   if (isRaining) {
     Object.assign(skyController, skySettings.rainingEarlyAfternoon);
     currentTime = "rainingEarlyAfternoon";
+  } else if (isSnowing) {
+    Object.assign(skyController, skySettings.snowingEarlyAfternoon);
+    currentTime = "snowingEarlyAfternoon";
   } else {
     Object.assign(skyController, skySettings.earlyAfternoon);
     currentTime = "earlyAfternoon";
@@ -639,6 +657,9 @@ skyDebug.lateAfternoonChange = () => {
   if (isRaining) {
     Object.assign(skyController, skySettings.rainingLateAfternoon);
     currentTime = "rainingLateAfternoon";
+  } else if (isSnowing) {
+    Object.assign(skyController, skySettings.snowingLateAfternoon);
+    currentTime = "snowingLateAfternoon";
   } else {
     Object.assign(skyController, skySettings.lateAfternoon);
     currentTime = "lateAfternoon";
@@ -649,6 +670,9 @@ skyDebug.sunsetChange = () => {
   if (isRaining) {
     Object.assign(skyController, skySettings.rainingSunset);
     currentTime = "rainingSunset";
+  } else if (isSnowing) {
+    Object.assign(skyController, skySettings.snowingSunset);
+    currentTime = "snowingSunset";
   } else {
     Object.assign(skyController, skySettings.sunset);
     currentTime = "sunset";
@@ -659,6 +683,9 @@ skyDebug.duskChange = () => {
   if (isRaining) {
     Object.assign(skyController, skySettings.rainingDusk);
     currentTime = "rainingDusk";
+  } else if (isSnowing) {
+    Object.assign(skyController, skySettings.snowingDusk);
+    currentTime = "snowingDusk";
   } else {
     Object.assign(skyController, skySettings.dusk);
     currentTime = "dusk";
@@ -669,6 +696,9 @@ skyDebug.earlyNightChange = () => {
   if (isRaining) {
     Object.assign(skyController, skySettings.rainingEarlyNight);
     currentTime = "rainingEarlyNight";
+  } else if (isSnowing) {
+    Object.assign(skyController, skySettings.snowingEarlyNight);
+    currentTime = "snowingEarlyNight";
   } else {
     Object.assign(skyController, skySettings.earlyNight);
     currentTime = "earlyNight";
@@ -679,6 +709,9 @@ skyDebug.midnightChange = () => {
   if (isRaining) {
     Object.assign(skyController, skySettings.rainingMidnight);
     currentTime = "rainingMidnight";
+  } else if (isSnowing) {
+    Object.assign(skyController, skySettings.snowingMidnight);
+    currentTime = "snowingMidnight";
   } else {
     Object.assign(skyController, skySettings.midnight);
     currentTime = "midnight";
@@ -1089,9 +1122,6 @@ rainGeometry.setAttribute(
 const rain = new THREE.Points(rainGeometry, rainMaterial);
 rain.visible = isRaining;
 scene.add(rain);
-// rain.position.x = 1.076;
-// rain.position.y = 1;
-// rain.position.z = -1.4012;
 
 const updateRain = () => {
   if (isRaining) {
@@ -1110,11 +1140,11 @@ snowObject.color = "#fff";
 snowObject.toggleSnow = () => {
   snow.visible = !snow.visible;
   isSnowing = snow.visible;
-  // currentTime = toggleRainOfDay(currentTime);
-  // const newSkyController = skySettings[currentTime];
-  // Object.assign(skyController, {
-  //   ...newSkyController,
-  // });
+  currentTime = toggleSnowOfDay(currentTime);
+  const newSkyController = skySettings[currentTime];
+  Object.assign(skyController, {
+    ...newSkyController,
+  });
 
   updateScene();
 };
@@ -1131,6 +1161,18 @@ snowObject.additiveBlendingChange = () => {
 };
 snowObject.normalBlendingChange = () => {
   snowMaterial.blending = THREE.NormalBlending;
+};
+
+const toggleSnowOfDay = (partOfDay) => {
+  if (partOfDay.startsWith("snowing")) {
+    // Remove "snowing" prefix and convert the first letter of the remaining part to lowercase
+    return partOfDay
+      .replace("snowing", "")
+      .replace(/^./, (str) => str.toLowerCase());
+  } else {
+    // Add "snowing" prefix and capitalize the first letter of partOfDay
+    return "snowing" + partOfDay.replace(/^./, (str) => str.toUpperCase());
+  }
 };
 
 snowSettings.add(snowObject, "toggleSnow");
@@ -1194,13 +1236,22 @@ snowGeometry.setAttribute(
 );
 
 const snow = new THREE.Points(snowGeometry, snowMaterial);
+snow.visible = isSnowing;
 scene.add(snow);
+
+const updateSnow = () => {
+  if (isSnowing) {
+    snowObject.rainOn();
+  } else {
+    snowObject.rainOff();
+  }
+};
 
 const updateScene = () => {
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
-  updateRain();
+  // updateRain();
   updateCampfire(currentTime);
 };
 
@@ -1348,6 +1399,8 @@ const updateWeather = async () => {
     });
 
     updateScene();
+    updateRain();
+    updateSnow();
 
     console.log(partOfDay);
 
