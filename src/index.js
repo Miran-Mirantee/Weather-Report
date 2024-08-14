@@ -21,7 +21,6 @@ let currentTime;
 /**
  * TODO:
  *  - add campfire smoke
- *  - add snow particle
  *  - add anti-aliasing
  *  - fix changing unit type call update weather()
  */
@@ -36,6 +35,7 @@ gui.close();
 sunAndSkySettings.close();
 campfireSettings.close();
 rainSettings.close();
+snowSettings.close();
 
 /**
  * Webgl
@@ -1023,6 +1023,7 @@ const rainObject = {};
 rainObject.count = 10000;
 rainObject.color = "#7ff0e8";
 rainObject.toggleRain = () => {
+  snowObject.snowOff();
   rain.visible = !rain.visible;
   isRaining = rain.visible;
   currentTime = toggleRainOfDay(currentTime);
@@ -1054,6 +1055,12 @@ const toggleRainOfDay = (partOfDay) => {
     return partOfDay
       .replace("raining", "")
       .replace(/^./, (str) => str.toLowerCase());
+  } else if (partOfDay.startsWith("snowing")) {
+    // Remove "snowing" prefix, add "raining" prefix and capitalize the first letter of partOfDay
+    return (
+      "raining" +
+      partOfDay.replace("snowing", "").replace(/^./, (str) => str.toUpperCase())
+    );
   } else {
     // Add "raining" prefix and capitalize the first letter of partOfDay
     return "raining" + partOfDay.replace(/^./, (str) => str.toUpperCase());
@@ -1138,6 +1145,7 @@ const snowObject = {};
 snowObject.count = 1000;
 snowObject.color = "#fff";
 snowObject.toggleSnow = () => {
+  rainObject.rainOff();
   snow.visible = !snow.visible;
   isSnowing = snow.visible;
   currentTime = toggleSnowOfDay(currentTime);
@@ -1152,7 +1160,7 @@ snowObject.snowOn = () => {
   snow.visible = true;
   isSnowing = true;
 };
-snowObject.rainOff = () => {
+snowObject.snowOff = () => {
   snow.visible = false;
   isSnowing = false;
 };
@@ -1169,6 +1177,12 @@ const toggleSnowOfDay = (partOfDay) => {
     return partOfDay
       .replace("snowing", "")
       .replace(/^./, (str) => str.toLowerCase());
+  } else if (partOfDay.startsWith("raining")) {
+    // Remove "raining" prefix, add "snowing" prefix and capitalize the first letter of partOfDay
+    return (
+      "snowing" +
+      partOfDay.replace("raining", "").replace(/^./, (str) => str.toUpperCase())
+    );
   } else {
     // Add "snowing" prefix and capitalize the first letter of partOfDay
     return "snowing" + partOfDay.replace(/^./, (str) => str.toUpperCase());
@@ -1241,9 +1255,9 @@ scene.add(snow);
 
 const updateSnow = () => {
   if (isSnowing) {
-    snowObject.rainOn();
+    snowObject.snowOn();
   } else {
-    snowObject.rainOff();
+    snowObject.snowOff();
   }
 };
 
