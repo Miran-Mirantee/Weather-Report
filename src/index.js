@@ -122,9 +122,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
       uPerlinTexture: new THREE.Uniform(perlinTexture),
       uGrassColor: new THREE.Uniform(grass.material.color),
       uSnowColor: new THREE.Uniform(new THREE.Color(snowObject.color)),
-      uTemp1: new THREE.Uniform(debugObject.temp1),
-      uTemp2: new THREE.Uniform(debugObject.temp2),
-      uTemp3: new THREE.Uniform(debugObject.temp3),
+      uSnowCoverage: new THREE.Uniform(0),
     },
 
     // MeshStandardMaterial
@@ -133,14 +131,8 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   grass.material = customGrassMaterial;
 
   gui
-    .add(customGrassMaterial.uniforms.uTemp1, "value", 0, 1, 0.001)
-    .name("temp1");
-  gui
-    .add(customGrassMaterial.uniforms.uTemp2, "value", 0, 1, 0.001)
-    .name("temp2");
-  gui
-    .add(customGrassMaterial.uniforms.uTemp3, "value", 1, 10, 0.001)
-    .name("temp3");
+    .add(customGrassMaterial.uniforms.uSnowCoverage, "value", 0, 1, 0.001)
+    .name("uSnowCoverage");
 
   snowSettings
     .addColor(snowObject, "color")
@@ -1451,6 +1443,23 @@ const getPartOfDay = (time, weather) => {
   }
 };
 
+const getSnowCoverage = (temperatureK) => {
+  const maxTemperatureK = 277.15; // Equivalent to 4°C or 40°F (no snow coverage)
+  const minTemperatureK = 266.15; // Equivalent to -7°C or 20°F (full snow coverage)
+
+  // Clamp the temperature to the range [minTemperatureK, maxTemperatureK]
+  const clampedTemp = Math.max(
+    Math.min(temperatureK, maxTemperatureK),
+    minTemperatureK
+  );
+
+  // Calculate coverage as a proportion of the temperature range
+  const snowCoverage =
+    1 - (clampedTemp - minTemperatureK) / (maxTemperatureK - minTemperatureK);
+
+  return snowCoverage;
+};
+
 const updateWeather = async () => {
   try {
     const weatherInfo = await fetchWeather(city);
@@ -1464,6 +1473,8 @@ const updateWeather = async () => {
     const newSkyController = skySettings[partOfDay];
     isRaining = main == "Rain";
     isSnowing = main == "Snow";
+
+    console.log(getSnowCoverage(temp));
 
     Object.assign(skyController, {
       ...newSkyController,
