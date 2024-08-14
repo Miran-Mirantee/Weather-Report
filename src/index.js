@@ -78,9 +78,7 @@ gradientTexture.flipY = false;
 let camera;
 
 const debugObject = {};
-debugObject.temp1 = 1;
-debugObject.temp2 = 1;
-debugObject.temp3 = 1;
+
 // Models
 gltfLoader.load("../static/camping.glb", (gltf) => {
   // Camera
@@ -130,9 +128,14 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   });
   grass.material = customGrassMaterial;
 
+  debugObject.updateGrass = (snowPercentage) => {
+    customGrassMaterial.uniforms.uSnowCoverage.value = snowPercentage;
+  };
+
   gui
     .add(customGrassMaterial.uniforms.uSnowCoverage, "value", 0, 1, 0.001)
-    .name("uSnowCoverage");
+    .name("uSnowCoverage")
+    .listen();
 
   snowSettings
     .addColor(snowObject, "color")
@@ -1473,8 +1476,7 @@ const updateWeather = async () => {
     const newSkyController = skySettings[partOfDay];
     isRaining = main == "Rain";
     isSnowing = main == "Snow";
-
-    console.log(getSnowCoverage(temp));
+    const snowPercentage = getSnowCoverage(temp);
 
     Object.assign(skyController, {
       ...newSkyController,
@@ -1483,6 +1485,7 @@ const updateWeather = async () => {
     updateScene();
     updateRain();
     updateSnow();
+    debugObject.updateGrass(snowPercentage);
 
     console.log(partOfDay);
 
