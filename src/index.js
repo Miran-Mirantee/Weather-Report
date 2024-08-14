@@ -12,6 +12,8 @@ import snowVertexShader from "./shaders/snow/vertex.glsl";
 import snowFragmentShader from "./shaders/snow/fragment.glsl";
 import grassVertexShader from "./shaders/grass/vertex.glsl";
 import grassFragmentShader from "./shaders/grass/fragment.glsl";
+import tentVertexShader from "./shaders/tent/vertex.glsl";
+import tentFragmentShader from "./shaders/tent/fragment.glsl";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
@@ -96,13 +98,19 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   console.log(merged);
 
   const tent = merged.children.find((child) => child.material.name == "tent");
-  console.log(tent);
 
   const customTentMaterial = new CustomShaderMaterial({
     // CSM
     baseMaterial: THREE.MeshStandardMaterial,
     silent: true,
-
+    fragmentShader: tentFragmentShader,
+    vertexShader: tentVertexShader,
+    uniforms: {
+      uPerlinTexture: new THREE.Uniform(perlinTexture),
+      uTentColor: new THREE.Uniform(tent.material.color),
+      uSnowColor: new THREE.Uniform(new THREE.Color(snowObject.color)),
+      uSnowCoverage: new THREE.Uniform(0),
+    },
     // MeshStandardMaterial
     ...tent.material,
   });
@@ -120,7 +128,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
       uPerlinTexture: new THREE.Uniform(perlinTexture),
       uGrassColor: new THREE.Uniform(grass.material.color),
       uSnowColor: new THREE.Uniform(new THREE.Color(snowObject.color)),
-      uSnowCoverage: new THREE.Uniform(0),
+      uSnowCoverage: new THREE.Uniform(snowObject.coverage),
     },
 
     // MeshStandardMaterial
@@ -130,12 +138,17 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
 
   debugObject.updateGrass = (snowPercentage) => {
     customGrassMaterial.uniforms.uSnowCoverage.value = snowPercentage;
+    customTentMaterial.uniforms.uSnowCoverage.value = snowPercentage;
   };
 
-  gui
-    .add(customGrassMaterial.uniforms.uSnowCoverage, "value", 0, 1, 0.001)
-    .name("uSnowCoverage")
-    .listen();
+  snowSettings
+    .add(snowObject, "coverage", 0, 1, 0.001)
+    .name("snow coverage")
+    .listen()
+    .onChange(() => {
+      customTentMaterial.uniforms.uSnowCoverage.value = snowObject.coverage;
+      customGrassMaterial.uniforms.uSnowCoverage.value = snowObject.coverage;
+    });
 
   snowSettings
     .addColor(snowObject, "color")
@@ -144,6 +157,9 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
     .onChange(() => {
       snowMaterial.uniforms.uColor.value.set(new THREE.Color(snowObject.color));
       customGrassMaterial.uniforms.uSnowColor.value.set(
+        new THREE.Color(snowObject.color)
+      );
+      customTentMaterial.uniforms.uSnowColor.value.set(
         new THREE.Color(snowObject.color)
       );
     });
@@ -1203,6 +1219,7 @@ const updateRain = () => {
 const snowObject = {};
 snowObject.count = 1000;
 snowObject.color = "#fff";
+snowObject.coverage = 0;
 snowObject.toggleSnow = () => {
   rainObject.rainOff();
   snow.visible = !snow.visible;
@@ -1476,7 +1493,7 @@ const updateWeather = async () => {
     const newSkyController = skySettings[partOfDay];
     isRaining = main == "Rain";
     isSnowing = main == "Snow";
-    const snowPercentage = getSnowCoverage(temp);
+    snowObject.coverage = getSnowCoverage(temp);
 
     Object.assign(skyController, {
       ...newSkyController,
@@ -1485,7 +1502,7 @@ const updateWeather = async () => {
     updateScene();
     updateRain();
     updateSnow();
-    debugObject.updateGrass(snowPercentage);
+    debugObject.updateGrass(snowObject.coverage);
 
     console.log(partOfDay);
 
