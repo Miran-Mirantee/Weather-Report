@@ -14,6 +14,8 @@ import grassVertexShader from "./shaders/grass/vertex.glsl";
 import grassFragmentShader from "./shaders/grass/fragment.glsl";
 import tentRoofVertexShader from "./shaders/tentRoof/vertex.glsl";
 import tentRoofFragmentShader from "./shaders/tentRoof/fragment.glsl";
+import leavesVertexShader from "./shaders/leaves/vertex.glsl";
+import leavesFragmentShader from "./shaders/leaves/fragment.glsl";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
@@ -88,14 +90,34 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  const controls = new OrbitControls(camera, canvasDom);
+  // const controls = new OrbitControls(camera, canvasDom);
   const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
     child.castShadow = true;
     child.material.side = 1;
   }
-  console.log(merged);
+
+  const leaves = merged.children.find(
+    (child) => child.material.name == "leaves"
+  );
+
+  const customLeavesMaterial = new CustomShaderMaterial({
+    // CSM
+    baseMaterial: THREE.MeshStandardMaterial,
+    slient: true,
+    fragmentShader: leavesFragmentShader,
+    vertexShader: leavesVertexShader,
+    uniforms: {
+      uLeavesColor: new THREE.Uniform(leaves.material.color),
+      uSnowColor: new THREE.Uniform(new THREE.Color(snowObject.color)),
+      uSnowCoverage: new THREE.Uniform(0),
+    },
+
+    // MeshStandardMaterial
+    ...leaves.material,
+  });
+  leaves.material = customLeavesMaterial;
 
   const tentRoof = gltf.scene.children.find(
     (child) => child.name == "tentRoof"
@@ -108,7 +130,6 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
     fragmentShader: tentRoofFragmentShader,
     vertexShader: tentRoofVertexShader,
     uniforms: {
-      uPerlinTexture: new THREE.Uniform(perlinTexture),
       uTentColor: new THREE.Uniform(tentRoof.material.color),
       uSnowColor: new THREE.Uniform(new THREE.Color(snowObject.color)),
       uSnowCoverage: new THREE.Uniform(0),
@@ -164,10 +185,11 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   });
   grass.material = customGrassMaterial;
 
-  debugObject.updateGrass = (snowPercentage) => {
-    customGrassMaterial.uniforms.uSnowCoverage.value = snowPercentage;
+  debugObject.updateGrass = () => {
+    customGrassMaterial.uniforms.uSnowCoverage.value = snowObject.coverage;
     customTentShadeMaterial.uniforms.uSnowCoverage.value = snowObject.coverage;
-    customTentRoofMaterial.uniforms.uSnowCoverage.value = snowPercentage;
+    customTentRoofMaterial.uniforms.uSnowCoverage.value = snowObject.coverage;
+    customLeavesMaterial.uniforms.uSnowCoverage.value = snowObject.coverage;
   };
 
   snowSettings
@@ -179,6 +201,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
       customTentShadeMaterial.uniforms.uSnowCoverage.value =
         snowObject.coverage;
       customGrassMaterial.uniforms.uSnowCoverage.value = snowObject.coverage;
+      customLeavesMaterial.uniforms.uSnowCoverage.value = snowObject.coverage;
     });
 
   snowSettings
@@ -194,6 +217,9 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
         new THREE.Color(snowObject.color)
       );
       customTentShadeMaterial.uniforms.uSnowColor.value.set(
+        new THREE.Color(snowObject.color)
+      );
+      customLeavesMaterial.uniforms.uSnowColor.value.set(
         new THREE.Color(snowObject.color)
       );
     });
@@ -1531,7 +1557,7 @@ const updateWeather = async () => {
     updateScene();
     updateRain();
     updateSnow();
-    debugObject.updateGrass(snowObject.coverage);
+    debugObject.updateGrass();
 
     console.log(partOfDay);
 
