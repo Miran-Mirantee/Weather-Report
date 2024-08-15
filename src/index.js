@@ -190,7 +190,10 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
       customGrassMaterial.uniforms.uSnowColor.value.set(
         new THREE.Color(snowObject.color)
       );
-      customTentMaterial.uniforms.uSnowColor.value.set(
+      customTentRoofMaterial.uniforms.uSnowColor.value.set(
+        new THREE.Color(snowObject.color)
+      );
+      customTentShadeMaterial.uniforms.uSnowColor.value.set(
         new THREE.Color(snowObject.color)
       );
     });
