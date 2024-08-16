@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Miran-Mirantee/Weather-Report#readme",
   "devDependencies": {
+    "@babel/core": "^7.25.2",
     "css-loader": "^6.7.3",
     "eslint": "^8.33.0",
     "eslint-config-airbnb-base": "^15.0.0",
@@ -30,10 +31,12 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
+    "@babel/runtime": "^7.25.0",
     "lil-gui": "^0.19.2",
     "lodash": "^4.17.21",
     "three": "^0.167.0",
     "three-custom-shader-material": "^5.4.0",
+    "three-nebula": "^10.0.3",
     "threejs-glsl-loader": "^1.0.4"
   }
 }

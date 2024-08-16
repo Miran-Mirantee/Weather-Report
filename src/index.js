@@ -1,3 +1,4 @@
+import Nebula, { SpriteRenderer } from "three-nebula";
 import * as THREE from "three";
 import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -16,6 +17,9 @@ import tentRoofVertexShader from "./shaders/tentRoof/vertex.glsl";
 import tentRoofFragmentShader from "./shaders/tentRoof/fragment.glsl";
 import leavesVertexShader from "./shaders/leaves/vertex.glsl";
 import leavesFragmentShader from "./shaders/leaves/fragment.glsl";
+import smokeVertexShader from "./shaders/smoke/vertex.glsl";
+import smokeFragmentShader from "./shaders/smoke/fragment.glsl";
+import json from "./../static/quick-test.json";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
@@ -90,7 +94,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  // const controls = new OrbitControls(camera, canvasDom);
+  const controls = new OrbitControls(camera, canvasDom);
   const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
@@ -1107,8 +1111,9 @@ flameGeometry.setAttribute(
   new THREE.BufferAttribute(flamePositionArray, 3)
 );
 
-const flame = new THREE.Points(flameGeometry, flameMaterial);
+const flame = new THREE.Mesh(flameGeometry, flameMaterial);
 flame.position.copy(campfireObject.position);
+flame.visible = false;
 
 scene.add(flame);
 
@@ -1142,9 +1147,20 @@ campfireSettings
 campfireSettings
   .addColor(campfireObject, "pointLightColor")
   .onChange(() => {
-    pointLight.color.set(new THREE.Color(campfireObject.color));
+    pointLight.color.set(new THREE.Color(campfireObject.pointLightColor));
   })
   .name("campfire light color");
+
+// Smoke
+const smokeGeometry = new THREE.PlaneGeometry(2, 2);
+const smokeMaterial = new THREE.ShaderMaterial({
+  vertexShader: smokeVertexShader,
+  fragmentShader: smokeFragmentShader,
+  side: THREE.DoubleSide,
+});
+const smoke = new THREE.Mesh(smokeGeometry, smokeMaterial);
+smoke.position.copy(campfireObject.position);
+// scene.add(smoke);
 
 /**
  * Rain
@@ -1389,9 +1405,16 @@ const updateScene = () => {
   updateSky();
   updateDirectionalLight();
   updateAmbientLight();
-  // updateRain();
   updateCampfire(currentTime);
 };
+
+let nebula;
+
+// Test particle
+Nebula.fromJSONAsync(json, THREE).then((loaded) => {
+  const nebularRenderer = new SpriteRenderer(scene, THREE);
+  nebula = loaded.addRenderer(nebularRenderer);
+});
 
 // Animate
 const clock = new THREE.Clock();
@@ -1408,6 +1431,8 @@ const tick = () => {
   flameMaterial.uniforms.uTime.value = elapsedTime;
   rainMaterial.uniforms.uTime.value = elapsedTime;
   snowMaterial.uniforms.uTime.value = elapsedTime;
+
+  if (nebula) nebula.update();
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
