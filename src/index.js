@@ -19,7 +19,7 @@ import leavesVertexShader from "./shaders/leaves/vertex.glsl";
 import leavesFragmentShader from "./shaders/leaves/fragment.glsl";
 import smokeVertexShader from "./shaders/smoke/vertex.glsl";
 import smokeFragmentShader from "./shaders/smoke/fragment.glsl";
-import json from "./../static/quick-test.json";
+import json from "./../static/Untitled.json";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
@@ -1111,7 +1111,7 @@ flameGeometry.setAttribute(
   new THREE.BufferAttribute(flamePositionArray, 3)
 );
 
-const flame = new THREE.Mesh(flameGeometry, flameMaterial);
+const flame = new THREE.Points(flameGeometry, flameMaterial);
 flame.position.copy(campfireObject.position);
 flame.visible = false;
 
@@ -1411,8 +1411,15 @@ const updateScene = () => {
 let nebula;
 
 // Test particle
-Nebula.fromJSONAsync(json, THREE).then((loaded) => {
+Nebula.fromJSONAsync(json.particleSystemState, THREE).then((loaded) => {
   const nebularRenderer = new SpriteRenderer(scene, THREE);
+  console.log(loaded);
+  loaded.emitters.forEach((emitter) => {
+    emitter.position.copy(campfireObject.position);
+    emitter.position.y -= 0.2;
+    console.log(emitter);
+  });
+
   nebula = loaded.addRenderer(nebularRenderer);
 });
 
