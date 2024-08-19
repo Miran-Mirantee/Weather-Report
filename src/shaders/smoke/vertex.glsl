@@ -3,8 +3,10 @@ uniform float uPixelRatio;
 uniform float uTime;
 
 attribute float aScale;
+attribute float aRotate;
 
 varying float vAlpha;
+varying float vRotate;
 
 void main() {
     vec3 newPosition = position;
@@ -18,9 +20,11 @@ void main() {
     vec4 projectionPosition = projectionMatrix * viewPosition;
 
     gl_Position = projectionPosition;
-    gl_PointSize = uSize * uPixelRatio * aScale;
+    gl_PointSize = uSize * uPixelRatio * aScale * (progress + 0.5);
     gl_PointSize *= 1.0 / -viewPosition.z;
 
     // Varyings
-    vAlpha = smoothstep(0.0, 0.15, progress);
+    vAlpha = smoothstep(0.0, 0.25, progress);
+    vAlpha *= smoothstep(0.0, 0.25, 1.0 - progress);
+    vRotate = aRotate + uTime * aScale * progress * 0.5;
 }

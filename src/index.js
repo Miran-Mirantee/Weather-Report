@@ -1156,11 +1156,12 @@ campfireSettings
 
 // Smoke
 const smokeObject = {};
-smokeObject.count = 1000;
+smokeObject.count = 100;
 
 const smokeGeometry = new THREE.BufferGeometry();
 const smokePositionArray = new Float32Array(smokeObject.count * 3);
 const smokeScaleArray = new Float32Array(smokeObject.count);
+const smokeRotationArray = new Float32Array(smokeObject.count);
 
 for (let i = 0; i < smokeObject.count; i++) {
   const i3 = i * 3;
@@ -1169,6 +1170,7 @@ for (let i = 0; i < smokeObject.count; i++) {
   smokePositionArray[i3 + 2] = (Math.random() - 0.5) * 0.25;
 
   smokeScaleArray[i] = Math.random() * 0.5 + 0.5;
+  smokeRotationArray[i] = Math.random() * Math.PI * 2;
 }
 
 smokeGeometry.setAttribute(
@@ -1179,6 +1181,11 @@ smokeGeometry.setAttribute(
 smokeGeometry.setAttribute(
   "aScale",
   new THREE.BufferAttribute(smokeScaleArray, 1)
+);
+
+smokeGeometry.setAttribute(
+  "aRotate",
+  new THREE.BufferAttribute(smokeRotationArray, 1)
 );
 
 const smokeMaterial = new THREE.ShaderMaterial({
