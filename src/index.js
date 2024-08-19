@@ -1466,6 +1466,8 @@ const tick = () => {
     renderer.render(scene, camera);
   }
 
+  console.log(elapsedTime);
+
   // Update time
   flameMaterial.uniforms.uTime.value = elapsedTime;
   rainMaterial.uniforms.uTime.value = elapsedTime;

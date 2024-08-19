@@ -26,5 +26,5 @@ void main() {
     // Varyings
     vAlpha = smoothstep(0.0, 0.25, progress);
     vAlpha *= smoothstep(0.0, 0.25, 1.0 - progress);
-    vRotate = aRotate + uTime * aScale * progress * 0.5;
+    vRotate = aRotate * progress * 0.5;
 }
