@@ -87,24 +87,60 @@ gradientTexture.flipY = false;
 
 const smokeTexture = textureLoader.load("../static/smoke_07.png");
 
-let camera;
-
 const debugObject = {};
+
+// Canvas
+const canvasDom = document.querySelector("canvas.webgl");
+
+// Scene
+const scene = new THREE.Scene();
+
+// Renderer
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvasDom,
+  antialias: true,
+});
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.75;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+let camera;
 
 // Models
 gltfLoader.load("../static/camping.glb", (gltf) => {
   // Camera
   camera = gltf.cameras[0];
   camera.aspect = sizes.width / sizes.height;
+
+  debugObject.resetCamera = () => {
+    camera.quaternion.copy(oldQuaternion);
+    camera.position.copy(oldPosition);
+  };
+
+  const oldQuaternion = new THREE.Quaternion();
+  const oldPosition = new THREE.Vector3();
+  oldQuaternion.copy(gltf.cameras[0].quaternion);
+  oldPosition.copy(gltf.cameras[0].position);
+
   camera.updateProjectionMatrix();
 
-  // const controls = new OrbitControls(camera, canvasDom);
+  // Orbit controls
+  const controls = new OrbitControls(camera, canvasDom);
+  debugObject.resetCamera();
+
+  gui.add(debugObject, "resetCamera");
+
   const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
     child.castShadow = true;
     child.material.side = 1;
   }
+  controls.target.copy(merged.position);
 
   const leaves = merged.children.find(
     (child) => child.material.name == "leaves"
@@ -243,25 +279,6 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   scene.add(camera);
   scene.add(gltf.scene);
 });
-
-// Canvas
-const canvasDom = document.querySelector("canvas.webgl");
-
-// Scene
-const scene = new THREE.Scene();
-
-// Renderer
-const renderer = new THREE.WebGLRenderer({
-  canvas: canvasDom,
-  antialias: true,
-});
-renderer.setSize(sizes.width, sizes.height);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.outputEncoding = THREE.sRGBEncoding;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 0.75;
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
 /**
  * Sky & sun
