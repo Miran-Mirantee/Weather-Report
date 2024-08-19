@@ -1008,14 +1008,17 @@ campfireObject.flameThirdColor = "#ffae00";
 campfireObject.toggleCampfire = () => {
   flame.visible = !flame.visible;
   pointLight.visible = !pointLight.visible;
+  smoke.visible = flame.visible;
 };
 campfireObject.killCampfire = () => {
   flame.visible = false;
   pointLight.visible = false;
+  smokeObject.smokeOff();
 };
 campfireObject.campfireOn = () => {
   flame.visible = true;
   pointLight.visible = true;
+  smokeObject.smokeOn();
 };
 
 campfireSettings.add(campfireObject, "toggleCampfire");
