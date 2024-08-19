@@ -72,14 +72,14 @@ const gltfLoader = new GLTFLoader();
 
 // Texture loader
 const textureLoader = new THREE.TextureLoader();
-const perlinTexture = textureLoader.load("../static/perlin.png");
+const perlinTexture = textureLoader.load("./perlin.png");
 perlinTexture.wrapS = THREE.RepeatWrapping;
 perlinTexture.wrapT = THREE.RepeatWrapping;
 
-const gradientTexture = textureLoader.load("../static/gradient.png");
+const gradientTexture = textureLoader.load("./gradient.png");
 gradientTexture.flipY = false;
 
-const smokeTexture = textureLoader.load("../static/smoke_07.png");
+const smokeTexture = textureLoader.load("./smoke_07.png");
 
 const debugObject = {};
 
@@ -105,7 +105,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 let camera;
 
 // Models
-gltfLoader.load("../static/camping.glb", (gltf) => {
+gltfLoader.load("./camping.glb", (gltf) => {
   // Camera
   camera = gltf.cameras[0];
   camera.aspect = sizes.width / sizes.height;
