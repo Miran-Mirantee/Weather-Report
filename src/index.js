@@ -96,7 +96,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
   camera.aspect = sizes.width / sizes.height;
   camera.updateProjectionMatrix();
 
-  const controls = new OrbitControls(camera, canvasDom);
+  // const controls = new OrbitControls(camera, canvasDom);
   const merged = gltf.scene.children.find((child) => child.name == "merged");
   for (const child of merged.children) {
     child.receiveShadow = true;
@@ -1157,6 +1157,16 @@ campfireSettings
 // Smoke
 const smokeObject = {};
 smokeObject.count = 100;
+smokeObject.color = "#bfbfbf";
+smokeObject.toggleSmoke = () => {
+  smoke.visible = !smoke.visible;
+};
+smokeObject.smokeOn = () => {
+  smoke.visible = true;
+};
+smokeObject.smokeOff = () => {
+  smoke.visible = false;
+};
 
 const smokeGeometry = new THREE.BufferGeometry();
 const smokePositionArray = new Float32Array(smokeObject.count * 3);
@@ -1193,20 +1203,33 @@ const smokeMaterial = new THREE.ShaderMaterial({
   fragmentShader: smokeFragmentShader,
   uniforms: {
     uSmokeTexture: new THREE.Uniform(smokeTexture),
-    uSize: new THREE.Uniform(100),
+    uSize: new THREE.Uniform(1000),
     uPixelRatio: new THREE.Uniform(Math.min(window.devicePixelRatio, 2)),
     uTime: new THREE.Uniform(0),
+    uColor: new THREE.Uniform(new THREE.Color(smokeObject.color)),
+    uOpacity: new THREE.Uniform(0.55),
   },
   transparent: true,
   depthWrite: false,
 });
 
+smokeSettings.add(smokeObject, "toggleSmoke");
 smokeSettings
   .add(smokeMaterial.uniforms.uSize, "value", 0, 1000, 1)
   .name("smoke particle size");
+smokeSettings
+  .add(smokeMaterial.uniforms.uOpacity, "value", 0, 1, 0.01)
+  .name("smoke particle opacity");
+smokeSettings
+  .addColor(smokeObject, "color")
+  .name("smoke particle color")
+  .onChange(() => {
+    smokeMaterial.uniforms.uColor.value.set(smokeObject.color);
+  });
 
 const smoke = new THREE.Points(smokeGeometry, smokeMaterial);
 smoke.position.copy(campfireObject.position);
+smoke.visible = false;
 scene.add(smoke);
 
 /**
@@ -1465,8 +1488,6 @@ const tick = () => {
     // Renderer
     renderer.render(scene, camera);
   }
-
-  console.log(elapsedTime);
 
   // Update time
   flameMaterial.uniforms.uTime.value = elapsedTime;

@@ -1,6 +1,7 @@
 uniform float uSize;
 uniform float uPixelRatio;
 uniform float uTime;
+uniform float uOpacity;
 
 attribute float aScale;
 attribute float aRotate;
@@ -26,5 +27,6 @@ void main() {
     // Varyings
     vAlpha = smoothstep(0.0, 0.25, progress);
     vAlpha *= smoothstep(0.0, 0.25, 1.0 - progress);
+    vAlpha *= uOpacity;
     vRotate = aRotate * progress * 0.5;
 }

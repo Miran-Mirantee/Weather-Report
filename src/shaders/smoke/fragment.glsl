@@ -1,4 +1,5 @@
 uniform sampler2D uSmokeTexture;
+uniform vec3 uColor;
 
 varying float vAlpha;
 varying float vRotate;
@@ -22,9 +23,13 @@ vec2 rotate2D(vec2 v, float angle, vec2 center) {
 
 void main() {
     vec2 rotatedUv = rotate2D(gl_PointCoord, vRotate, vec2(0.5));
+    vec3 color = uColor;
 
     float smokeTexture = texture(uSmokeTexture, rotatedUv.xy).r;
     smokeTexture *= vAlpha;
 
-    gl_FragColor = vec4(1.0, 1.0, 1.0, smokeTexture);
+    gl_FragColor = vec4(color, smokeTexture);
+
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
 }
