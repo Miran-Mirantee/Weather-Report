@@ -23,15 +23,16 @@ import "./style.css";
 const api = "514e1ece08bcd2e992e2242256b805de";
 let city = "Samut Sakhon";
 let tempUnit = "c";
+let temperature;
+let feelsLike;
 let isRaining = false;
 let isSnowing = false;
 let currentTime;
 
 /**
  * TODO:
- *  - add campfire smoke
  *  - add anti-aliasing
- *  - fix changing unit type call update weather()
+ *  - add camera movement (restricted)
  */
 
 // gui
@@ -42,11 +43,12 @@ const rainSettings = gui.addFolder("Rain settings");
 const snowSettings = gui.addFolder("Snow settings");
 const smokeSettings = gui.addFolder("Smoke settings");
 
-// gui.close();
+gui.close();
 sunAndSkySettings.close();
 campfireSettings.close();
 rainSettings.close();
 snowSettings.close();
+smokeSettings.close();
 
 /**
  * Webgl
@@ -164,6 +166,7 @@ gltfLoader.load("../static/camping.glb", (gltf) => {
       uSnowColor: new THREE.Uniform(new THREE.Color(snowObject.color)),
       uSnowCoverage: new THREE.Uniform(0),
     },
+
     // MeshStandardMaterial
     ...tentShade.material,
   });
@@ -993,7 +996,7 @@ sunAndSkySettings
   .listen();
 
 /**
- * Campfire
+ * Campfire & smoke
  */
 // Shader
 const campfireObject = {};
@@ -1666,6 +1669,9 @@ const updateWeather = async () => {
     pressureDOM.textContent = `Pressure: ${pressure} hPa`;
     windSpeedDOM.textContent = `Wind Speed: ${windSpeed} m/s`;
 
+    temperature = temp;
+    feelsLike = feels_like;
+
     errorMsg.textContent = "";
   } catch (err) {
     errorMsg.textContent = "Error: location not found";
@@ -1685,5 +1691,6 @@ tempDOM.addEventListener("click", () => {
   } else {
     tempUnit = "c";
   }
-  updateWeather();
+  tempDOM.textContent = convertTemp(tempUnit, temperature);
+  realFeelDom.textContent = `Feels like: ${convertTemp(tempUnit, feelsLike)}`;
 });
