@@ -1,6 +1,5 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   mode: "development",
@@ -11,9 +10,6 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: "./src/index.html",
-    }),
-    new CopyWebpackPlugin({
-      patterns: [{ from: path.resolve(__dirname, "./static") }],
     }),
   ],
   output: {
@@ -30,6 +26,11 @@ module.exports = {
       {
         test: /\.(png|svg|jpg|jpeg|gif|glb)$/i,
         type: "asset/resource",
+        loader: "file-loader",
+        options: {
+          publicPath: "./",
+          name: "[name].[ext]",
+        },
       },
       {
         test: /\.(glsl|vert|frag)$/,
