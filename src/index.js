@@ -19,7 +19,7 @@ import leavesVertexShader from "./shaders/leaves/vertex.glsl";
 import leavesFragmentShader from "./shaders/leaves/fragment.glsl";
 import smokeVertexShader from "./shaders/smoke/vertex.glsl";
 import smokeFragmentShader from "./shaders/smoke/fragment.glsl";
-import json from "./../static/Untitled.json";
+import json from "./../static/smoke.json";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
@@ -82,6 +82,8 @@ perlinTexture.wrapT = THREE.RepeatWrapping;
 
 const gradientTexture = textureLoader.load("../static/gradient.png");
 gradientTexture.flipY = false;
+
+const smokeTexture = textureLoader.load("../static/smoke_07.png");
 
 let camera;
 
@@ -1152,15 +1154,48 @@ campfireSettings
   .name("campfire light color");
 
 // Smoke
-const smokeGeometry = new THREE.PlaneGeometry(2, 2);
+const smokeObject = {};
+smokeObject.count = 1000;
+
+const smokeGeometry = new THREE.BufferGeometry();
+const smokePositionArray = new Float32Array(smokeObject.count * 3);
+const smokeScaleArray = new Float32Array(smokeObject.count);
+
+for (let i = 0; i < smokeObject.count; i++) {
+  const i3 = i * 3;
+  smokePositionArray[i3] = (Math.random() - 0.5) * 0.25;
+  smokePositionArray[i3 + 1] = Math.random() * 3.5;
+  smokePositionArray[i3 + 2] = (Math.random() - 0.5) * 0.25;
+
+  smokeScaleArray[i] = Math.random() * 0.5 + 0.5;
+}
+
+smokeGeometry.setAttribute(
+  "position",
+  new THREE.BufferAttribute(smokePositionArray, 3)
+);
+
+smokeGeometry.setAttribute(
+  "aScale",
+  new THREE.BufferAttribute(smokeScaleArray, 1)
+);
+
 const smokeMaterial = new THREE.ShaderMaterial({
   vertexShader: smokeVertexShader,
   fragmentShader: smokeFragmentShader,
-  side: THREE.DoubleSide,
+  uniforms: {
+    uSmokeTexture: new THREE.Uniform(smokeTexture),
+    uSize: new THREE.Uniform(100),
+    uPixelRatio: new THREE.Uniform(Math.min(window.devicePixelRatio, 2)),
+    uTime: new THREE.Uniform(0),
+  },
+  transparent: true,
+  depthWrite: false,
 });
-const smoke = new THREE.Mesh(smokeGeometry, smokeMaterial);
+
+const smoke = new THREE.Points(smokeGeometry, smokeMaterial);
 smoke.position.copy(campfireObject.position);
-// scene.add(smoke);
+scene.add(smoke);
 
 /**
  * Rain
@@ -1438,8 +1473,9 @@ const tick = () => {
   flameMaterial.uniforms.uTime.value = elapsedTime;
   rainMaterial.uniforms.uTime.value = elapsedTime;
   snowMaterial.uniforms.uTime.value = elapsedTime;
+  smokeMaterial.uniforms.uTime.value = elapsedTime;
 
-  if (nebula) nebula.update();
+  // if (nebula) nebula.update();
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
