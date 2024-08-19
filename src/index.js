@@ -40,7 +40,9 @@ const sunAndSkySettings = gui.addFolder("Sun & Sky settings");
 const campfireSettings = gui.addFolder("Campfire settings");
 const rainSettings = gui.addFolder("Rain settings");
 const snowSettings = gui.addFolder("Snow settings");
-gui.close();
+const smokeSettings = gui.addFolder("Smoke settings");
+
+// gui.close();
 sunAndSkySettings.close();
 campfireSettings.close();
 rainSettings.close();
@@ -1079,6 +1081,7 @@ const flameMaterial = new THREE.ShaderMaterial({
   },
   transparent: true,
   blending: THREE.AdditiveBlending,
+  depthWrite: false,
 });
 
 campfireSettings
@@ -1190,6 +1193,10 @@ const smokeMaterial = new THREE.ShaderMaterial({
   transparent: true,
   depthWrite: false,
 });
+
+smokeSettings
+  .add(smokeMaterial.uniforms.uSize, "value", 0, 1000, 1)
+  .name("smoke particle size");
 
 const smoke = new THREE.Points(smokeGeometry, smokeMaterial);
 smoke.position.copy(campfireObject.position);
