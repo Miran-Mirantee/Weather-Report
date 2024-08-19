@@ -29,12 +29,6 @@ let isRaining = false;
 let isSnowing = false;
 let currentTime;
 
-/**
- * TODO:
- *  - add anti-aliasing
- *  - add camera movement (restricted)
- */
-
 // gui
 const gui = new GUI();
 const sunAndSkySettings = gui.addFolder("Sun & Sky settings");
