@@ -1,4 +1,3 @@
-import Nebula, { SpriteRenderer } from "three-nebula";
 import * as THREE from "three";
 import GUI from "lil-gui";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -19,7 +18,6 @@ import leavesVertexShader from "./shaders/leaves/vertex.glsl";
 import leavesFragmentShader from "./shaders/leaves/fragment.glsl";
 import smokeVertexShader from "./shaders/smoke/vertex.glsl";
 import smokeFragmentShader from "./shaders/smoke/fragment.glsl";
-import json from "./../static/smoke.json";
 import "./style.css";
 
 const api = "514e1ece08bcd2e992e2242256b805de";
@@ -1443,21 +1441,6 @@ const updateScene = () => {
   updateCampfire(currentTime);
 };
 
-let nebula;
-
-// Test particle
-Nebula.fromJSONAsync(json.particleSystemState, THREE).then((loaded) => {
-  const nebularRenderer = new SpriteRenderer(scene, THREE);
-  console.log(loaded);
-  loaded.emitters.forEach((emitter) => {
-    emitter.position.copy(campfireObject.position);
-    emitter.position.y -= 0.2;
-    console.log(emitter);
-  });
-
-  nebula = loaded.addRenderer(nebularRenderer);
-});
-
 // Animate
 const clock = new THREE.Clock();
 
@@ -1474,8 +1457,6 @@ const tick = () => {
   rainMaterial.uniforms.uTime.value = elapsedTime;
   snowMaterial.uniforms.uTime.value = elapsedTime;
   smokeMaterial.uniforms.uTime.value = elapsedTime;
-
-  // if (nebula) nebula.update();
 
   // Call tick again on the next frame
   window.requestAnimationFrame(tick);
