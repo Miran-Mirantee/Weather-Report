@@ -50,6 +50,10 @@ input {
   font-family: "Chivo Mono";
 }
 
+input::placeholder {
+  color: white;
+}
+
 .report {
   display: flex;
   flex-direction: column;
