@@ -24,7 +24,7 @@ body {
 }
 
 form {
-  position: absolute;
+  position: fixed;
   display: flex;
   flex-direction: column;
   top: 18px;
@@ -40,7 +40,7 @@ form {
 input {
   height: 24px;
   width: 275px;
-  font-size: 18px;
+  font-size: 1.125rem;
   padding: 8px 24px;
   border: none;
   border-radius: 4px;
@@ -59,14 +59,14 @@ input::placeholder {
   flex-direction: column;
   gap: 2px;
   position: absolute;
-  top: 36px;
+  top: 18px;
   left: 36px;
-  font-size: 24px;
+  font-size: 1.5rem;
   text-shadow: 1px 2px 3px #373434;
 }
 
 .city {
-  font-size: 54px;
+  font-size: 3.5rem;
   font-weight: bold;
 }
 
@@ -76,7 +76,7 @@ input::placeholder {
 }
 
 .weather {
-  font-size: 36px;
+  font-size: 2.25rem;
   position: relative;
   display: flex;
   align-items: center;
@@ -89,7 +89,139 @@ input::placeholder {
 }
 
 .temp {
-  font-size: 132px;
+  font-size: 8.25rem;
   font-weight: bold;
   cursor: pointer;
+}
+
+.lil-gui {
+  top: 65px !important;
+  right: 18px !important;
+}
+
+.webgl {
+  position: fixed;
+}
+
+.control-btn {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  font-size: 1rem;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  box-shadow: 1px 2px 3px #373434;
+}
+
+@media screen and (max-width: 1024px) {
+  input {
+    font-size: 1rem;
+    padding: 6px 20px;
+    width: 220px;
+  }
+
+  .report {
+    font-size: 1.2rem;
+  }
+
+  .city {
+    font-size: 2.8rem;
+  }
+
+  .weather {
+    font-size: 1.8rem;
+  }
+
+  .temp {
+    font-size: 6.6rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  body {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  form {
+    position: static;
+    z-index: 1;
+    margin-top: 18px;
+    margin-bottom: 18px;
+  }
+
+  input {
+    font-size: 1rem;
+    padding: 4px 16px;
+  }
+
+  .report {
+    position: static;
+    z-index: 1;
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .city {
+    font-size: 2.25rem;
+  }
+
+  .weather {
+    font-size: 1.5rem;
+  }
+
+  .temp {
+    font-size: 5.3rem;
+  }
+
+  .lil-gui {
+    top: 0 !important;
+    right: calc(50% - 122.5px) !important;
+    /* font-size: 10px !important; */
+  }
+}
+
+@media screen and (max-width: 425px) {
+  input {
+    font-size: 1rem;
+  }
+
+  .report {
+    font-size: 1rem;
+  }
+
+  .city {
+    font-size: 1.8rem;
+  }
+
+  .weather {
+    font-size: 1.2rem;
+  }
+
+  .temp {
+    font-size: 4.25rem;
+  }
+}
+
+@media screen and (max-width: 375px) {
+  .icon {
+    width: 75px;
+  }
+
+  .main {
+    margin-left: 83px;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .icon {
+    width: 75px;
+  }
+
+  .main {
+    margin-left: 83px;
+  }
 }
