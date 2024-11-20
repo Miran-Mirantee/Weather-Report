@@ -37,12 +37,20 @@ const rainSettings = gui.addFolder("Rain settings");
 const snowSettings = gui.addFolder("Snow settings");
 const smokeSettings = gui.addFolder("Smoke settings");
 
+gui.show(false);
 gui.close();
 sunAndSkySettings.close();
 campfireSettings.close();
 rainSettings.close();
 snowSettings.close();
 smokeSettings.close();
+
+// gui control btn
+const controlBtn = document.querySelector(".control-btn");
+controlBtn.addEventListener("click", () => {
+  gui.show(gui._hidden); // toggle
+  controlBtn.textContent = gui._hidden ? "Show GUI" : "Hide GUI";
+});
 
 /**
  * Webgl
